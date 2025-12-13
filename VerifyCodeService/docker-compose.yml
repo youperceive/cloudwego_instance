@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  redis:
+    image: docker.xuanyuan.run/ubuntu/redis:5.0-20.04_edge
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    restart: always
+    environment:
+      - ALLOW_EMPTY_PASSWORD=true
+
+  verify-code-service:
+    image: verify-code-service:latest
+    environment:
+      - PRINT_CAPTCHA=true
+      - REDIS_ADDR=redis:6379
+    depends_on:
+      - redis
+    restart: always
+    ports:
+      - "8000:8000"
+
+volumes:
+  redis-data:
