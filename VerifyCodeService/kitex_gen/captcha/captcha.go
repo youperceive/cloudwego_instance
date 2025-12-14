@@ -58,6 +58,8 @@ type GenerateCaptchaRequest struct {
 	Purpose          string      `thrift:"purpose,3" frugal:"3,default,string" json:"purpose"`
 	ExpireSeconds    int32       `thrift:"expire_seconds,4,optional" frugal:"4,optional,i32" json:"expire_seconds,omitempty"`
 	MaxValidateTimes int32       `thrift:"max_validate_times,5,optional" frugal:"5,optional,i32" json:"max_validate_times,omitempty"`
+	Proj             string      `thrift:"proj,6" frugal:"6,default,string" json:"proj"`
+	BizType          string      `thrift:"biz_type,7" frugal:"7,default,string" json:"biz_type"`
 }
 
 func NewGenerateCaptchaRequest() *GenerateCaptchaRequest {
@@ -101,6 +103,14 @@ func (p *GenerateCaptchaRequest) GetMaxValidateTimes() (v int32) {
 	}
 	return p.MaxValidateTimes
 }
+
+func (p *GenerateCaptchaRequest) GetProj() (v string) {
+	return p.Proj
+}
+
+func (p *GenerateCaptchaRequest) GetBizType() (v string) {
+	return p.BizType
+}
 func (p *GenerateCaptchaRequest) SetType(val CaptchaType) {
 	p.Type = val
 }
@@ -115,6 +125,12 @@ func (p *GenerateCaptchaRequest) SetExpireSeconds(val int32) {
 }
 func (p *GenerateCaptchaRequest) SetMaxValidateTimes(val int32) {
 	p.MaxValidateTimes = val
+}
+func (p *GenerateCaptchaRequest) SetProj(val string) {
+	p.Proj = val
+}
+func (p *GenerateCaptchaRequest) SetBizType(val string) {
+	p.BizType = val
 }
 
 func (p *GenerateCaptchaRequest) IsSetExpireSeconds() bool {
@@ -138,6 +154,8 @@ var fieldIDToName_GenerateCaptchaRequest = map[int16]string{
 	3: "purpose",
 	4: "expire_seconds",
 	5: "max_validate_times",
+	6: "proj",
+	7: "biz_type",
 }
 
 type GenerateCaptchaResponse struct {
@@ -182,6 +200,8 @@ type ValidateCaptchaRequest struct {
 	Target  string `thrift:"target,1" frugal:"1,default,string" json:"target"`
 	Purpose string `thrift:"purpose,2" frugal:"2,default,string" json:"purpose"`
 	Captcha string `thrift:"captcha,3" frugal:"3,default,string" json:"captcha"`
+	Proj    string `thrift:"proj,4" frugal:"4,default,string" json:"proj"`
+	BizType string `thrift:"biz_type,5" frugal:"5,default,string" json:"biz_type"`
 }
 
 func NewValidateCaptchaRequest() *ValidateCaptchaRequest {
@@ -202,6 +222,14 @@ func (p *ValidateCaptchaRequest) GetPurpose() (v string) {
 func (p *ValidateCaptchaRequest) GetCaptcha() (v string) {
 	return p.Captcha
 }
+
+func (p *ValidateCaptchaRequest) GetProj() (v string) {
+	return p.Proj
+}
+
+func (p *ValidateCaptchaRequest) GetBizType() (v string) {
+	return p.BizType
+}
 func (p *ValidateCaptchaRequest) SetTarget(val string) {
 	p.Target = val
 }
@@ -210,6 +238,12 @@ func (p *ValidateCaptchaRequest) SetPurpose(val string) {
 }
 func (p *ValidateCaptchaRequest) SetCaptcha(val string) {
 	p.Captcha = val
+}
+func (p *ValidateCaptchaRequest) SetProj(val string) {
+	p.Proj = val
+}
+func (p *ValidateCaptchaRequest) SetBizType(val string) {
+	p.BizType = val
 }
 
 func (p *ValidateCaptchaRequest) String() string {
@@ -223,6 +257,8 @@ var fieldIDToName_ValidateCaptchaRequest = map[int16]string{
 	1: "target",
 	2: "purpose",
 	3: "captcha",
+	4: "proj",
+	5: "biz_type",
 }
 
 type ValidateCaptchaResponse struct {

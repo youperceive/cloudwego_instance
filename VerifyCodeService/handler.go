@@ -20,7 +20,9 @@ type CaptchaServiceImpl struct{}
 // GenerateCaptcha implements the CaptchaServiceImpl interface.
 func (s *CaptchaServiceImpl) GenerateCaptcha(ctx context.Context, req *captcha.GenerateCaptchaRequest) (resp *captcha.GenerateCaptchaResponse, err error) {
 
-	exist, err := redis.Exists(ctx, req.Target, req.Purpose)
+	key := redis.MakeKey([]string{req.Proj, req.BizType, req.Target})
+
+	exist, err := redis.Exists(ctx, key)
 	if err != nil {
 		log.Println(err)
 		resp = &captcha.GenerateCaptchaResponse{
@@ -46,7 +48,7 @@ func (s *CaptchaServiceImpl) GenerateCaptcha(ctx context.Context, req *captcha.G
 
 	// here need to deliver the code to user's target (email or phone)
 
-	err = redis.SetWithCount(ctx, req.Target, req.Purpose, code, time.Duration(req.ExpireSeconds)*time.Second, int(req.MaxValidateTimes))
+	err = redis.SetWithCount(ctx, key, code, time.Duration(req.ExpireSeconds)*time.Second, int(req.MaxValidateTimes))
 	if err != nil {
 		log.Println(err)
 		resp = &captcha.GenerateCaptchaResponse{
@@ -66,7 +68,7 @@ func (s *CaptchaServiceImpl) GenerateCaptcha(ctx context.Context, req *captcha.G
 	}
 
 	if os.Getenv("PRINT_CAPTCHA") == "true" {
-		log.Printf("Generated captcha for target %s, purpose %s: %s\n", req.Target, req.Purpose, code)
+		log.Printf("Generated captcha for proj %s, biz_type: %s, target: %s: %s\n", req.Proj, req.BizType, req.Target, code)
 	}
 
 	return
@@ -75,7 +77,9 @@ func (s *CaptchaServiceImpl) GenerateCaptcha(ctx context.Context, req *captcha.G
 // ValidateCaptcha implements the CaptchaServiceImpl interface.
 func (s *CaptchaServiceImpl) ValidateCaptcha(ctx context.Context, req *captcha.ValidateCaptchaRequest) (resp *captcha.ValidateCaptchaResponse, err error) {
 
-	code, remain, err := redis.GetAndDecrementCount(ctx, req.Target, req.Purpose)
+	key := redis.MakeKey([]string{req.Proj, req.BizType, req.Target})
+
+	code, remain, err := redis.GetAndDecrementCount(ctx, key)
 	if err != nil {
 		log.Println(err)
 		if err == redis_v9.Nil {
@@ -114,7 +118,7 @@ func (s *CaptchaServiceImpl) ValidateCaptcha(ctx context.Context, req *captcha.V
 		return
 	}
 
-	err = redis.Delete(ctx, req.Target, req.Purpose)
+	err = redis.Delete(ctx, key)
 	if err != nil {
 		log.Println(err)
 		resp = &captcha.ValidateCaptchaResponse{
