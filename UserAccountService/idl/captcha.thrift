@@ -18,23 +18,28 @@ A possible example:
 struct GenerateCaptchaRequest {
     1: CaptchaType type,
     2: string target,
-    3: string purpose,
+    3: string purpose,                      // discarded
+    4: optional i32 expire_seconds = 300,
+    5: optional i32 max_validate_times = 3,
+    6: string proj,
+    7: string biz_type,
 }
 
 struct GenerateCaptchaResponse {
     1: base.BaseResponse baseResp,
-    2: string chapta,              // the generated captcha code
 }
 
 struct ValidateCaptchaRequest {
     1: string target,
-    2: string purpose,
-    3: string captcha, // the captcha code to be validated
+    2: string purpose,  //deprecated, use biz_type instead
+    3: string captcha,
+    4: string proj,
+    5: string biz_type,
 }
 
 struct ValidateCaptchaResponse {
     1: base.BaseResponse baseResp,
-    2: bool valid,                 // whether the captcha is valid
+    2: bool valid,
 }
 
 service CaptchaService {

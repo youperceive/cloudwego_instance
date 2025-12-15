@@ -4,6 +4,7 @@ enum Code {
     SUCCESS = 0,
     INVALID_PARAM = 1,
     DB_ERR = 2,
+    SERVICE_ERR = 3,
 }
 
 struct BaseResponse {

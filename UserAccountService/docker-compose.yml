@@ -1,0 +1,75 @@
+# 移除过时的version字段（避免警告）
+services:
+  # etcd:
+  #   image: etcd:latest
+  #   ports:
+  #     - "2379:2379" # 客户端端口
+  #     - "2380:2380" # 集群通信端口
+  #   volumes:
+  #     - etcd-data:/var/lib/etcd # 数据持久化卷
+  #   restart: always
+  #   # 关键修复：第一个参数是etcd可执行文件路径，后续是启动参数
+  #   command:
+  #     - /usr/local/bin/etcd
+  #     - --data-dir=/var/lib/etcd
+  #     - --listen-client-urls=http://0.0.0.0:2379
+  #     - --advertise-client-urls=http://0.0.0.0:2379
+  #     - --listen-peer-urls=http://0.0.0.0:2380
+  #     - --initial-advertise-peer-urls=http://0.0.0.0:2380
+  #     - --initial-cluster=default=http://0.0.0.0:2380
+  #     - --initial-cluster-token=etcd-cluster-token
+  #     - --initial-cluster-state=new
+  #     - --name=default
+
+  redis:
+    image: docker.xuanyuan.run/ubuntu/redis:5.0-20.04_edge
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    restart: always
+    environment:
+      - ALLOW_EMPTY_PASSWORD=true
+
+  verify-code-service:
+    image: verify-code-service:latest
+    environment:
+      - PRINT_CAPTCHA=true
+      - REDIS_ADDR=redis:6379
+      # - ETCD_ADDR=etcd:2379 # 访问docker-compose内的etcd服务
+    depends_on:
+      - redis
+      # - etcd
+    restart: always
+    ports:
+      - "8000:8000"
+
+  mysql:
+    image: docker.xuanyuan.run/ubuntu/mysql:8.0-20.04_beta # 你指定的镜像
+    ports:
+      - "3306:3306" # MySQL默认端口映射（宿主机:容器）
+    volumes:
+      - mysql-data:/var/lib/mysql # 数据持久化卷（避免容器重启数据丢失）
+      - /home/alfredgit/proj/CloudWeGoInstance/UserAccountService/pkg/dao/sql/:/docker-entrypoint-initdb.d/
+      # 可选：挂载初始化SQL脚本（首次启动自动执行）
+      # - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: always # 异常重启策略
+    environment:
+      # 必配：MySQL root密码（8.0+不允许空密码，必须设置）
+      - MYSQL_ROOT_PASSWORD=123456
+      # 可选：首次启动自动创建数据库（比如用户账户服务的库）
+      - MYSQL_DATABASE=user_account_db
+      # 可选：创建普通用户（避免直接用root）
+      - MYSQL_USER=user_service
+      - MYSQL_PASSWORD=user123456
+    # 优化配置：解决中文乱码、时区错误、兼容旧客户端（可选但建议加）
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time_zone=+8:00
+      - --default-authentication-plugin=mysql_native_password
+
+volumes:
+  redis-data:
+  mysql-data:

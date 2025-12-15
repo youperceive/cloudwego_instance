@@ -1,5 +1,6 @@
 {
     "type": 1,
-    "target": "123456",
-    "purpose": "proj_new"
+    "proj": "proj_new",
+    "biz_type": "login",
+    "target": "123456"
 }
