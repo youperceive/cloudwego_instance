@@ -1,10 +1,11 @@
 package main
 
 import (
-	"CloudWeGoInstance/UserAccountService/kitex_gen/captcha/captchaservice"
-	user "CloudWeGoInstance/UserAccountService/kitex_gen/user/useraccountservice"
 	"log"
 	"net"
+
+	user "github.com/youperceive/cloudwego_instance/rpc/user_account/kitex_gen/user/useraccountservice"
+	"github.com/youperceive/cloudwego_instance/rpc/verify_code/kitex_gen/verify_code/verifycodeservice"
 
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/server"
@@ -17,7 +18,7 @@ func main() {
 	}
 
 	userAccountServiceImpl := new(UserAccountServiceImpl)
-	userAccountServiceImpl.CaptchaClient = captchaservice.MustNewClient("CaptchaService", client.WithHostPorts("0.0.0.0:8000"))
+	userAccountServiceImpl.VerifyCodeClient = verifycodeservice.MustNewClient("CaptchaService", client.WithHostPorts("0.0.0.0:8000"))
 
 	svr := user.NewServer(
 		userAccountServiceImpl,

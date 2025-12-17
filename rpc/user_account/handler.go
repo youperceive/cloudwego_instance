@@ -6,18 +6,18 @@ import (
 	"log"
 	"strings"
 
-	"github.com/cloudwego_instance/rpc/user_account/kitex_gen/base"
-	user "github.com/cloudwego_instance/rpc/user_account/kitex_gen/user"
-	"github.com/cloudwego_instance/rpc/user_account/pkg/dao"
-	"github.com/cloudwego_instance/rpc/user_account/pkg/hash"
-	"github.com/cloudwego_instance/rpc/verify_code/kitex_gen/captcha"
+	base "github.com/youperceive/cloudwego_instance/rpc/user_account/kitex_gen/base"
+	user "github.com/youperceive/cloudwego_instance/rpc/user_account/kitex_gen/user"
+	"github.com/youperceive/cloudwego_instance/rpc/user_account/pkg/dao"
+	"github.com/youperceive/cloudwego_instance/rpc/user_account/pkg/hash"
 
-	"github.com/cloudwego_instance/rpc/verify_code/kitex_gen/captcha/captchaservice"
+	"github.com/youperceive/cloudwego_instance/rpc/verify_code/kitex_gen/verify_code"
+	"github.com/youperceive/cloudwego_instance/rpc/verify_code/kitex_gen/verify_code/verifycodeservice"
 )
 
 // UserAccountServiceImpl implements the last service interface defined in the IDL.
 type UserAccountServiceImpl struct {
-	CaptchaClient captchaservice.Client
+	VerifyCodeClient verifycodeservice.Client
 }
 
 func validateRegisterReq(req *user.RegisterRequest) error {
@@ -25,7 +25,7 @@ func validateRegisterReq(req *user.RegisterRequest) error {
 	if req.Target == "" || req.Captcha == "" || req.Password == "" {
 		msg = append(msg, "target, captcha or password is empty.")
 	}
-	if _, err := req.RegisterType.Value(); err != nil {
+	if _, err := req.TargetType.Value(); err != nil {
 		msg = append(msg, "RegisterType invalid.")
 	}
 	if len(msg) > 0 {
@@ -47,14 +47,14 @@ func (s *UserAccountServiceImpl) Register(ctx context.Context, req *user.Registe
 		return resp, nil
 	}
 
-	captchaReq := &captcha.ValidateCaptchaRequest{
+	captchaReq := &verify_code.ValidateCaptchaRequest{
 		Proj:    "user-account-service",
 		BizType: "login",
 		Target:  req.Target,
 		Captcha: req.Captcha,
 	}
 
-	captchaResp, err := s.CaptchaClient.ValidateCaptcha(ctx, captchaReq)
+	captchaResp, err := s.VerifyCodeClient.ValidateCaptcha(ctx, captchaReq)
 	if err != nil {
 		log.Println(err)
 		resp = &user.RegisterResponse{
@@ -87,12 +87,12 @@ func (s *UserAccountServiceImpl) Register(ctx context.Context, req *user.Registe
 	if req.Username != nil {
 		daoUser.Username = *req.Username
 	}
-	if req.RegisterType == user.RegisterType_PHONE {
+	if req.TargetType == base.TargetType_Phone {
 		daoUser.Phone = &req.Target
 	} else {
 		daoUser.Email = &req.Target
 	}
-	daoUser.RegisterType = int8(req.RegisterType)
+	daoUser.RegisterType = int8(req.TargetType)
 
 	userID, err := dao.CreateUser(daoUser)
 	if err != nil {

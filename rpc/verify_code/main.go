@@ -5,7 +5,7 @@ import (
 	"net"
 	"os"
 
-	"github.com/youperceive/cloudwego_instance/rpc/verify_code/kitex_gen/captcha/captchaservice"
+	"github.com/youperceive/cloudwego_instance/rpc/verify_code/kitex_gen/verify_code/verifycodeservice"
 
 	"github.com/cloudwego/kitex/pkg/registry"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -34,8 +34,8 @@ func main() {
 		panic("fail to link to addr" + err.Error())
 	}
 
-	svr := captchaservice.NewServer(
-		new(CaptchaServiceImpl),
+	svr := verifycodeservice.NewServer(
+		new(VerifyCodeServiceImpl),
 		server.WithRegistry(r),
 		server.WithServerBasicInfo(
 			&rpcinfo.EndpointBasicInfo{

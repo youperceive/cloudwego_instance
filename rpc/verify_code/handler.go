@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/youperceive/cloudwego_instance/rpc/verify_code/kitex_gen/base"
-	captcha "github.com/youperceive/cloudwego_instance/rpc/verify_code/kitex_gen/captcha"
+	verify_code "github.com/youperceive/cloudwego_instance/rpc/verify_code/kitex_gen/verify_code"
 	"github.com/youperceive/cloudwego_instance/rpc/verify_code/pkg/redis"
 	"github.com/youperceive/cloudwego_instance/rpc/verify_code/pkg/util"
 
@@ -17,16 +17,17 @@ import (
 
 // CaptchaServiceImpl implements the last service interface defined in the IDL.
 type CaptchaServiceImpl struct{}
+type VerifyCodeServiceImpl struct{}
 
 // GenerateCaptcha implements the CaptchaServiceImpl interface.
-func (s *CaptchaServiceImpl) GenerateCaptcha(ctx context.Context, req *captcha.GenerateCaptchaRequest) (resp *captcha.GenerateCaptchaResponse, err error) {
+func (s *VerifyCodeServiceImpl) GenerateCaptcha(ctx context.Context, req *verify_code.GenerateCaptchaRequest) (resp *verify_code.GenerateCaptchaResponse, err error) {
 
 	key := redis.MakeKey([]string{req.Proj, req.BizType, req.Target})
 
 	exist, err := redis.Exists(ctx, key)
 	if err != nil {
 		log.Println(err)
-		resp = &captcha.GenerateCaptchaResponse{
+		resp = &verify_code.GenerateCaptchaResponse{
 			BaseResp: &base.BaseResponse{
 				Code: base.Code_DB_ERR,
 				Msg:  "Internal error",
@@ -36,7 +37,7 @@ func (s *CaptchaServiceImpl) GenerateCaptcha(ctx context.Context, req *captcha.G
 	}
 
 	if exist {
-		resp = &captcha.GenerateCaptchaResponse{
+		resp = &verify_code.GenerateCaptchaResponse{
 			BaseResp: &base.BaseResponse{
 				Code: base.Code_INVALID_PARAM,
 				Msg:  "Captcha already exists",
@@ -52,7 +53,7 @@ func (s *CaptchaServiceImpl) GenerateCaptcha(ctx context.Context, req *captcha.G
 	err = redis.SetWithCount(ctx, key, code, time.Duration(req.ExpireSeconds)*time.Second, int(req.MaxValidateTimes))
 	if err != nil {
 		log.Println(err)
-		resp = &captcha.GenerateCaptchaResponse{
+		resp = &verify_code.GenerateCaptchaResponse{
 			BaseResp: &base.BaseResponse{
 				Code: base.Code_DB_ERR,
 				Msg:  "Internal error",
@@ -61,7 +62,7 @@ func (s *CaptchaServiceImpl) GenerateCaptcha(ctx context.Context, req *captcha.G
 		return
 	}
 
-	resp = &captcha.GenerateCaptchaResponse{
+	resp = &verify_code.GenerateCaptchaResponse{
 		BaseResp: &base.BaseResponse{
 			Code: base.Code_SUCCESS,
 			Msg:  "",
@@ -76,7 +77,7 @@ func (s *CaptchaServiceImpl) GenerateCaptcha(ctx context.Context, req *captcha.G
 }
 
 // ValidateCaptcha implements the CaptchaServiceImpl interface.
-func (s *CaptchaServiceImpl) ValidateCaptcha(ctx context.Context, req *captcha.ValidateCaptchaRequest) (resp *captcha.ValidateCaptchaResponse, err error) {
+func (s *VerifyCodeServiceImpl) ValidateCaptcha(ctx context.Context, req *verify_code.ValidateCaptchaRequest) (resp *verify_code.ValidateCaptchaResponse, err error) {
 
 	key := redis.MakeKey([]string{req.Proj, req.BizType, req.Target})
 
@@ -85,7 +86,7 @@ func (s *CaptchaServiceImpl) ValidateCaptcha(ctx context.Context, req *captcha.V
 		log.Println(err)
 		if err == redis_v9.Nil {
 			log.Println("not exists the code")
-			resp = &captcha.ValidateCaptchaResponse{
+			resp = &verify_code.ValidateCaptchaResponse{
 				BaseResp: &base.BaseResponse{
 					Code: base.Code_INVALID_PARAM,
 					Msg:  "not exists the code",
@@ -93,7 +94,7 @@ func (s *CaptchaServiceImpl) ValidateCaptcha(ctx context.Context, req *captcha.V
 				Valid: false,
 			}
 		} else {
-			resp = &captcha.ValidateCaptchaResponse{
+			resp = &verify_code.ValidateCaptchaResponse{
 				BaseResp: &base.BaseResponse{
 					Code: base.Code_DB_ERR,
 					Msg:  "Internal error",
@@ -110,7 +111,7 @@ func (s *CaptchaServiceImpl) ValidateCaptcha(ctx context.Context, req *captcha.V
 			msg = "no remain count, has been deleted"
 		}
 
-		resp = &captcha.ValidateCaptchaResponse{
+		resp = &verify_code.ValidateCaptchaResponse{
 			BaseResp: &base.BaseResponse{
 				Code: base.Code_INVALID_PARAM,
 				Msg:  msg,
@@ -123,7 +124,7 @@ func (s *CaptchaServiceImpl) ValidateCaptcha(ctx context.Context, req *captcha.V
 	err = redis.Delete(ctx, key)
 	if err != nil {
 		log.Println(err)
-		resp = &captcha.ValidateCaptchaResponse{
+		resp = &verify_code.ValidateCaptchaResponse{
 			BaseResp: &base.BaseResponse{
 				Code: base.Code_DB_ERR,
 				Msg:  "Internal error",
@@ -133,7 +134,7 @@ func (s *CaptchaServiceImpl) ValidateCaptcha(ctx context.Context, req *captcha.V
 		return
 	}
 
-	resp = &captcha.ValidateCaptchaResponse{
+	resp = &verify_code.ValidateCaptchaResponse{
 		BaseResp: &base.BaseResponse{
 			Code: base.Code_SUCCESS,
 			Msg:  "",

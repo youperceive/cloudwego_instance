@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/cloudwego_instance/rpc/user_account/pkg/mysql"
+	"github.com/youperceive/cloudwego_instance/rpc/user_account/pkg/mysql"
 )
 
 type User struct {

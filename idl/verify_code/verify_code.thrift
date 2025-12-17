@@ -1,4 +1,4 @@
-namespace go captcha
+namespace go verify_code
 
 include "../base/base.thrift"
 
@@ -34,7 +34,7 @@ struct ValidateCaptchaResponse {
     2: bool valid,
 }
 
-service CaptchaService {
+service VerifyCodeService {
     GenerateCaptchaResponse GenerateCaptcha(1: GenerateCaptchaRequest req),
     ValidateCaptchaResponse ValidateCaptcha(1: ValidateCaptchaRequest req),
 }

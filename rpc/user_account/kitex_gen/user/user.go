@@ -7,7 +7,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
-	"github.com/cloudwego_instance/rpc/user_account/kitex_gen/base"
+	"github.com/youperceive/cloudwego_instance/rpc/user_account/kitex_gen/base"
 )
 
 type UserType int64
