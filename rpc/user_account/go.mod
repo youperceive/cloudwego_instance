@@ -5,7 +5,7 @@ go 1.23.2
 require (
 	github.com/cloudwego/gopkg v0.1.7
 	github.com/cloudwego/kitex v0.15.2
-	github.com/youperceive/cloudwego_instance/rpc/verify_code v0.0.0-00010101000000-000000000000
+	// github.com/youperceive/cloudwego_instance/rpc/verify_code v0.0.0-00010101000000-000000000000
 	gorm.io/driver/mysql v1.6.0
 	gorm.io/gorm v1.31.1
 )
@@ -54,6 +54,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/youperceive/cloudwego_instance/rpc/verify_code => ../verify_code/
+// replace github.com/youperceive/cloudwego_instance/rpc/verify_code => ../verify_code/
 
-replace github.com/youperceive/cloudwego_instance/rpc/user_account => ./
+// replace github.com/youperceive/cloudwego_instance/rpc/user_account => ./
