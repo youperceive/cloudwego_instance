@@ -16,7 +16,6 @@ import (
 )
 
 // CaptchaServiceImpl implements the last service interface defined in the IDL.
-type CaptchaServiceImpl struct{}
 type VerifyCodeServiceImpl struct{}
 
 // GenerateCaptcha implements the CaptchaServiceImpl interface.

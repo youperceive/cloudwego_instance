@@ -1,6 +1,6 @@
 module github.com/youperceive/cloudwego_instance/rpc/user_account
 
-go 1.23.2
+go 1.22.2
 
 require (
 	github.com/cloudwego/gopkg v0.1.7
