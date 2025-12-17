@@ -5,7 +5,7 @@ import (
 	"net"
 	"os"
 
-	"github.com/cloudwego_instance/rpc/verify_code/kitex_gen/captcha/captchaservice"
+	"github.com/youperceive/cloudwego_instance/rpc/verify_code/kitex_gen/captcha/captchaservice"
 
 	"github.com/cloudwego/kitex/pkg/registry"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"

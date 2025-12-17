@@ -1,4 +1,4 @@
-module github.com/cloudwego_instance/rpc/verify_code
+module github.com/youperceive/cloudwego_instance/rpc/verify_code
 
 go 1.23.0
 

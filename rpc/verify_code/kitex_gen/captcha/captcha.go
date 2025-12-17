@@ -5,7 +5,7 @@ package captcha
 import (
 	"context"
 	"fmt"
-	"github.com/cloudwego_instance/rpc/verify_code/kitex_gen/base"
+	"github.com/youperceive/cloudwego_instance/rpc/verify_code/kitex_gen/base"
 )
 
 type GenerateCaptchaRequest struct {

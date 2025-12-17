@@ -1,15 +1,16 @@
 package main
 
 import (
-	"github.com/cloudwego_instance/rpc/verify_code/kitex_gen/base"
-	captcha "github.com/cloudwego_instance/rpc/verify_code/kitex_gen/captcha"
-	"github.com/cloudwego_instance/rpc/verify_code/pkg/redis"
-	"github.com/cloudwego_instance/rpc/verify_code/pkg/util"
 	"context"
 	"log"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/youperceive/cloudwego_instance/rpc/verify_code/kitex_gen/base"
+	captcha "github.com/youperceive/cloudwego_instance/rpc/verify_code/kitex_gen/captcha"
+	"github.com/youperceive/cloudwego_instance/rpc/verify_code/pkg/redis"
+	"github.com/youperceive/cloudwego_instance/rpc/verify_code/pkg/util"
 
 	redis_v9 "github.com/redis/go-redis/v9"
 )
