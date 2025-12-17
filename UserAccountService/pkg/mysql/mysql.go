@@ -15,7 +15,8 @@ var DB *gorm.DB
 func init() {
 	dsn := os.Getenv("MYSQL_DSN")
 	if dsn == "" {
-		log.Fatal("ERROR: 环境变量 MYSQL_DSN 未配置")
+		log.Println("ERROR: 环境变量 MYSQL_DSN 未配置，使用默认配置")
+		dsn = "user_service:user123456@tcp(mysql:3306)/user_account_db?charset=utf8mb4&parseTime=True&loc=Local"
 	}
 
 	logLevel := logger.Silent

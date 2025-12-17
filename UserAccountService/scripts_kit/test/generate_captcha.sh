@@ -4,7 +4,7 @@ kitexcall \
 --idl-path ../VerifyCodeService/idl/captcha.thrift \
 --method CaptchaService/GenerateCaptcha \
 --endpoint 127.0.0.1:8000 \
--d '{"type": 1, "proj": "user-account-service", "biz_type": "login", "target": "123456"}'
+-d '{"type": 1, "proj": "user-account-service", "biz_type": "login", "target": "sxshenxu"}'
 
 # struct GenerateCaptchaRequest {
 #     1: CaptchaType type,

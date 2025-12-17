@@ -83,6 +83,7 @@ func (s *CaptchaServiceImpl) ValidateCaptcha(ctx context.Context, req *captcha.V
 	if err != nil {
 		log.Println(err)
 		if err == redis_v9.Nil {
+			log.Println("not exists the code")
 			resp = &captcha.ValidateCaptchaResponse{
 				BaseResp: &base.BaseResponse{
 					Code: base.Code_INVALID_PARAM,

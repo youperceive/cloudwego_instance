@@ -73,3 +73,5 @@ services:
 volumes:
   redis-data:
   mysql-data:
+
+# user_service:user123456@tcp(mysql:3306)/user_account_db?charset=utf8mb4&parseTime=True&loc=Local

@@ -22,7 +22,7 @@ type UserAccountServiceImpl struct {
 func validateRegisterReq(req *user.RegisterRequest) error {
 	var msg []string
 	if req.Target == "" || req.Captcha == "" || req.Password == "" {
-		msg = append(msg, "target, captcha or password is empty.") 
+		msg = append(msg, "target, captcha or password is empty.")
 	}
 	if _, err := req.RegisterType.Value(); err != nil {
 		msg = append(msg, "RegisterType invalid.")
@@ -87,9 +87,9 @@ func (s *UserAccountServiceImpl) Register(ctx context.Context, req *user.Registe
 		daoUser.Username = *req.Username
 	}
 	if req.RegisterType == user.RegisterType_PHONE {
-		daoUser.Phone = req.Target
+		daoUser.Phone = &req.Target
 	} else {
-		daoUser.Email = req.Target
+		daoUser.Email = &req.Target
 	}
 	daoUser.RegisterType = int8(req.RegisterType)
 

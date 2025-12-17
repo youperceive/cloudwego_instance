@@ -10,8 +10,8 @@ import (
 type User struct {
 	ID           int64           `gorm:"primarykey;column:id;type:bigint unsigned;autoIncrement"`
 	Username     string          `gorm:"column:username;type:varchar(64);default:''"`
-	Email        string          `gorm:"column:email;type:varchar(128);uniqueIndex:uk_email"`
-	Phone        string          `gorm:"column:phone;type:varchar(20);uniqueIndex:uk_phone"`
+	Email        *string         `gorm:"column:email;type:varchar(128);uniqueIndex:uk_email"`
+	Phone        *string         `gorm:"column:phone;type:varchar(20);uniqueIndex:uk_phone"`
 	Password     string          `gorm:"column:password;type:varchar(255);not null"`
 	RegisterType int8            `gorm:"column:register_type;type:tinyint;not null"`
 	UserType     int8            `gorm:"column:user_type;type:tinyint;not null;default:1"`
@@ -31,7 +31,7 @@ func CreateUser(user *User) (int64, error) {
 	user.UpdatedAt = now
 	if user.Ext == nil {
 		user.Ext = json.RawMessage("{}")
-	}
+	} 
 
 	if err := mysql.DB.Create(user).Error; err != nil {
 		log.Println(err)

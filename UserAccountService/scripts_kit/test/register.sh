@@ -4,4 +4,4 @@ kitexcall \
 --idl-path idl/user.thrift \
 --method UserAccountService/Register \
 --endpoint 127.0.0.1:8001 \
--d '{"username": "AlfredGit", "target": "123456", "register_type": 2, "password": "123456", "captcha": "508441"}'
+-d '{"username": "sxkane", "target": "sxshenxu", "register_type": 1, "password": "123456", "captcha": "451500"}'
