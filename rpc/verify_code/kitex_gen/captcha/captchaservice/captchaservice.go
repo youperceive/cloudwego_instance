@@ -3,11 +3,11 @@
 package captchaservice
 
 import (
-	captcha "CloudWeGoInstance/kitex_gen/captcha"
 	"context"
 	"errors"
 	client "github.com/cloudwego/kitex/client"
 	kitex "github.com/cloudwego/kitex/pkg/serviceinfo"
+	captcha "github.com/cloudwego_instance/rpc/verify_code/kitex_gen/captcha"
 )
 
 var errInvalidMessageType = errors.New("invalid message type for service method handler")

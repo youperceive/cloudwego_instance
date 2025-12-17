@@ -3,11 +3,11 @@
 package user
 
 import (
-	"CloudWeGoInstance/kitex_gen/base"
 	"context"
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
+	"github.com/cloudwego_instance/rpc/user_account/kitex_gen/base"
 )
 
 type UserType int64

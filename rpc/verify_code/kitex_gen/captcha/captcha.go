@@ -3,9 +3,9 @@
 package captcha
 
 import (
-	"CloudWeGoInstance/kitex_gen/base"
 	"context"
 	"fmt"
+	"github.com/cloudwego_instance/rpc/verify_code/kitex_gen/base"
 )
 
 type GenerateCaptchaRequest struct {

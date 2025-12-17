@@ -1,4 +1,4 @@
-module CloudWeGoInstance/UserAccountService
+module github.com/cloudwego_instance/rpc/user_account
 
 go 1.22.2
 

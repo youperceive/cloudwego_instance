@@ -1,10 +1,10 @@
 package main
 
 import (
-	"CloudWeGoInstance/VerifyCodeService/kitex_gen/base"
-	captcha "CloudWeGoInstance/VerifyCodeService/kitex_gen/captcha"
-	"CloudWeGoInstance/VerifyCodeService/pkg/redis"
-	"CloudWeGoInstance/VerifyCodeService/pkg/util"
+	"github.com/cloudwego_instance/rpc/verify_code/kitex_gen/base"
+	captcha "github.com/cloudwego_instance/rpc/verify_code/kitex_gen/captcha"
+	"github.com/cloudwego_instance/rpc/verify_code/pkg/redis"
+	"github.com/cloudwego_instance/rpc/verify_code/pkg/util"
 	"context"
 	"log"
 	"os"

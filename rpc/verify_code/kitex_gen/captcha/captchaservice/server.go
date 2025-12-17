@@ -2,8 +2,8 @@
 package captchaservice
 
 import (
-	captcha "CloudWeGoInstance/kitex_gen/captcha"
 	server "github.com/cloudwego/kitex/server"
+	captcha "github.com/cloudwego_instance/rpc/verify_code/kitex_gen/captcha"
 )
 
 // NewServer creates a server.Server with the given handler and options.

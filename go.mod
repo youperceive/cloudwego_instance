@@ -1,4 +1,4 @@
-module CloudWeGoInstance
+module github.com/cloudwego_instance
 
 go 1.22.2
 

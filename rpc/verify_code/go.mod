@@ -1,10 +1,11 @@
-module CloudWeGoInstance/VerifyCodeService
+module github.com/cloudwego_instance/rpc/verify_code
 
 go 1.23.0
 
 toolchain go1.24.11
 
 require (
+	github.com/cloudwego/gopkg v0.1.7
 	github.com/cloudwego/kitex v0.15.2
 	github.com/kitex-contrib/registry-etcd v0.3.0
 	github.com/redis/go-redis/v9 v9.17.2
@@ -20,7 +21,6 @@ require (
 	github.com/cloudwego/dynamicgo v0.7.0 // indirect
 	github.com/cloudwego/fastpb v0.0.5 // indirect
 	github.com/cloudwego/frugal v0.3.0 // indirect
-	github.com/cloudwego/gopkg v0.1.7 // indirect
 	github.com/cloudwego/localsession v0.1.2 // indirect
 	github.com/cloudwego/netpoll v0.7.2 // indirect
 	github.com/cloudwego/runtimex v0.1.1 // indirect

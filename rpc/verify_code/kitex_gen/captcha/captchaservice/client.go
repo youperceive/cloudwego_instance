@@ -3,10 +3,10 @@
 package captchaservice
 
 import (
-	captcha "CloudWeGoInstance/kitex_gen/captcha"
 	"context"
 	client "github.com/cloudwego/kitex/client"
 	callopt "github.com/cloudwego/kitex/client/callopt"
+	captcha "github.com/cloudwego_instance/rpc/verify_code/kitex_gen/captcha"
 )
 
 // Client is designed to provide IDL-compatible methods with call-option parameter for kitex framework.

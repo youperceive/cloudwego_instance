@@ -1,10 +1,11 @@
 package dao
 
 import (
-	"CloudWeGoInstance/UserAccountService/pkg/mysql"
 	"encoding/json"
 	"log"
 	"time"
+
+	"github.com/cloudwego_instance/rpc/user_account/pkg/mysql"
 )
 
 type User struct {
@@ -31,7 +32,7 @@ func CreateUser(user *User) (int64, error) {
 	user.UpdatedAt = now
 	if user.Ext == nil {
 		user.Ext = json.RawMessage("{}")
-	} 
+	}
 
 	if err := mysql.DB.Create(user).Error; err != nil {
 		log.Println(err)

@@ -1,17 +1,18 @@
 package main
 
 import (
-	"CloudWeGoInstance/UserAccountService/kitex_gen/base"
-	"CloudWeGoInstance/UserAccountService/kitex_gen/captcha"
-	user "CloudWeGoInstance/UserAccountService/kitex_gen/user"
-	"CloudWeGoInstance/UserAccountService/pkg/dao"
-	"CloudWeGoInstance/UserAccountService/pkg/hash"
 	"context"
 	"fmt"
 	"log"
 	"strings"
 
-	"CloudWeGoInstance/UserAccountService/kitex_gen/captcha/captchaservice"
+	"github.com/cloudwego_instance/rpc/user_account/kitex_gen/base"
+	user "github.com/cloudwego_instance/rpc/user_account/kitex_gen/user"
+	"github.com/cloudwego_instance/rpc/user_account/pkg/dao"
+	"github.com/cloudwego_instance/rpc/user_account/pkg/hash"
+	"github.com/cloudwego_instance/rpc/verify_code/kitex_gen/captcha"
+
+	"github.com/cloudwego_instance/rpc/verify_code/kitex_gen/captcha/captchaservice"
 )
 
 // UserAccountServiceImpl implements the last service interface defined in the IDL.
