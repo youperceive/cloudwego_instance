@@ -51,7 +51,7 @@ services:
       - "3306:3306" # MySQL默认端口映射（宿主机:容器）
     volumes:
       - mysql-data:/var/lib/mysql # 数据持久化卷（避免容器重启数据丢失）
-      - /home/alfredgit/proj/CloudWeGoInstance/UserAccountService/pkg/dao/sql/:/docker-entrypoint-initdb.d/
+      - /home/alfredgit/proj/cloudwego_instance/rpc/user_account/pkg/dao/sql/:/docker-entrypoint-initdb.d/
       # 可选：挂载初始化SQL脚本（首次启动自动执行）
       # - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
     restart: always # 异常重启策略
@@ -74,4 +74,5 @@ volumes:
   redis-data:
   mysql-data:
 
-# user_service:user123456@tcp(mysql:3306)/user_account_db?charset=utf8mb4&parseTime=True&loc=Local
+    # user_service:user123456@tcp(mysql:3306)/user_account_db?charset=utf8mb4&parseTime=True&loc=Local
+    # docker exec -it 07510e8e8a6c mysql -u user_service -p

@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/cloudwego/kitex/pkg/klog"
 	base "github.com/youperceive/cloudwego_instance/rpc/user_account/kitex_gen/base"
 	user "github.com/youperceive/cloudwego_instance/rpc/user_account/kitex_gen/user"
 	"github.com/youperceive/cloudwego_instance/rpc/user_account/pkg/dao"
@@ -19,6 +19,11 @@ import (
 type UserAccountServiceImpl struct {
 	VerifyCodeClient verifycodeservice.Client
 }
+
+var (
+	internalErrMsg = "Internal Error."
+	successMsg     = "Success."
+)
 
 func validateRegisterReq(req *user.RegisterRequest) error {
 	var msg []string
@@ -36,13 +41,22 @@ func validateRegisterReq(req *user.RegisterRequest) error {
 
 // Register implements the UserAccountServiceImpl interface.
 func (s *UserAccountServiceImpl) Register(ctx context.Context, req *user.RegisterRequest) (resp *user.RegisterResponse, err error) {
+	klogErr := func(msg string) {
+		klog.Error(
+			"method", "Register",
+			"message", msg,
+			"target", req.Target,
+		)
+	}
+
 	if err := validateRegisterReq(req); err != nil {
+		klogErr("fail to validate req params." + err.Error())
 		resp = &user.RegisterResponse{
 			BaseResp: &base.BaseResponse{
 				Code: base.Code_INVALID_PARAM,
 				Msg:  err.Error(),
 			},
-			UserId: nil, // temporary
+			UserId: nil,
 		}
 		return resp, nil
 	}
@@ -56,25 +70,39 @@ func (s *UserAccountServiceImpl) Register(ctx context.Context, req *user.Registe
 
 	captchaResp, err := s.VerifyCodeClient.ValidateCaptcha(ctx, captchaReq)
 	if err != nil {
-		log.Println(err)
+		klogErr("fail to call verifyCodeClient.ValidateCaptcha()" + err.Error())
 		resp = &user.RegisterResponse{
 			BaseResp: &base.BaseResponse{
 				Code: base.Code_SERVICE_ERR,
-				Msg:  "Internal error.",
+				Msg:  internalErrMsg,
 			},
 			UserId: nil,
 		}
 		return
 	}
 	if !captchaResp.Valid {
-		msg := ""
+		msg := "fail to validate captcha."
 		if captchaResp.BaseResp != nil {
-			msg = captchaResp.BaseResp.Msg
+			msg += captchaResp.BaseResp.Msg
 		}
+		klogErr(msg)
 		resp = &user.RegisterResponse{
 			BaseResp: &base.BaseResponse{
 				Code: base.Code_INVALID_PARAM,
-				Msg:  "fail to validate captcha." + msg,
+				Msg:  "fail to validate captcha.",
+			},
+			UserId: nil,
+		}
+		return
+	}
+
+	hashedPassword, err := hash.BCryptHash(req.Password)
+	if err != nil {
+		klogErr("fail to hash password." + err.Error())
+		resp = &user.RegisterResponse{
+			BaseResp: &base.BaseResponse{
+				Code: base.Code_SERVICE_ERR,
+				Msg:  internalErrMsg,
 			},
 			UserId: nil,
 		}
@@ -82,7 +110,7 @@ func (s *UserAccountServiceImpl) Register(ctx context.Context, req *user.Registe
 	}
 
 	daoUser := &dao.User{
-		Password: hash.Hash(req.Password),
+		Password: hashedPassword,
 	}
 	if req.Username != nil {
 		daoUser.Username = *req.Username
@@ -96,11 +124,11 @@ func (s *UserAccountServiceImpl) Register(ctx context.Context, req *user.Registe
 
 	userID, err := dao.CreateUser(daoUser)
 	if err != nil {
-		log.Println(err)
+		klogErr("fail to create user." + err.Error())
 		resp = &user.RegisterResponse{
 			BaseResp: &base.BaseResponse{
 				Code: base.Code_DB_ERR,
-				Msg:  "fail to create user.",
+				Msg:  internalErrMsg,
 			},
 			UserId: nil,
 		}
@@ -110,7 +138,7 @@ func (s *UserAccountServiceImpl) Register(ctx context.Context, req *user.Registe
 	resp = &user.RegisterResponse{
 		BaseResp: &base.BaseResponse{
 			Code: base.Code_SUCCESS,
-			Msg:  "",
+			Msg:  successMsg,
 		},
 		UserId: &userID,
 	}

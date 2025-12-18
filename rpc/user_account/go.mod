@@ -6,6 +6,7 @@ require (
 	github.com/cloudwego/gopkg v0.1.7
 	github.com/cloudwego/kitex v0.15.2
 	github.com/youperceive/cloudwego_instance/rpc/verify_code v0.0.0-20251217133424-51a516c39051
+	golang.org/x/crypto v0.22.0
 	gorm.io/driver/mysql v1.6.0
 	gorm.io/gorm v1.31.1
 )

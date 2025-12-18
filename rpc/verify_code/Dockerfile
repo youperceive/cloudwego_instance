@@ -1,5 +1,5 @@
 # ========== 阶段1：构建阶段（debian系，支持动态编译） ==========
-FROM golang:1.23.2 AS builder
+FROM golang:1.22.2 AS builder
 
 # 1. 换debian国内源（阿里云），加速apt下载
 RUN sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debian.sources && \
