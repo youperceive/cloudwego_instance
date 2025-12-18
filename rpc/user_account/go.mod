@@ -5,7 +5,7 @@ go 1.22.2
 require (
 	github.com/cloudwego/gopkg v0.1.7
 	github.com/cloudwego/kitex v0.15.2
-	// github.com/youperceive/cloudwego_instance/rpc/verify_code v0.0.0-00010101000000-000000000000
+	github.com/youperceive/cloudwego_instance/rpc/verify_code v0.0.0-20251217133424-51a516c39051
 	gorm.io/driver/mysql v1.6.0
 	gorm.io/gorm v1.31.1
 )
@@ -44,16 +44,12 @@ require (
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	golang.org/x/arch v0.14.0 // indirect
-	golang.org/x/net v0.38.0 // indirect
-	golang.org/x/sync v0.16.0 // indirect
-	golang.org/x/sys v0.31.0 // indirect
-	golang.org/x/text v0.23.0 // indirect
-	google.golang.org/genproto v0.0.0-20240227224415-6ceb2ff114de // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250303144028-a0af3efb3deb // indirect
-	google.golang.org/protobuf v1.36.5 // indirect
+	golang.org/x/net v0.24.0 // indirect
+	golang.org/x/sync v0.9.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/text v0.20.0 // indirect
+	google.golang.org/genproto v0.0.0-20231012201019-e917dd12ba7a // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20231016165738-49dd2c1f3d0b // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-// replace github.com/youperceive/cloudwego_instance/rpc/verify_code => ../verify_code/
-
-// replace github.com/youperceive/cloudwego_instance/rpc/user_account => ./
