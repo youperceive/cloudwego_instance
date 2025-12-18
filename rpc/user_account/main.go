@@ -4,7 +4,7 @@ import (
 	"log"
 	"net"
 
-	user "github.com/youperceive/cloudwego_instance/rpc/user_account/kitex_gen/user/useraccountservice"
+	user_account "github.com/youperceive/cloudwego_instance/rpc/user_account/kitex_gen/user_account/useraccountservice"
 	"github.com/youperceive/cloudwego_instance/rpc/verify_code/kitex_gen/verify_code/verifycodeservice"
 
 	"github.com/cloudwego/kitex/client"
@@ -20,7 +20,7 @@ func main() {
 	userAccountServiceImpl := new(UserAccountServiceImpl)
 	userAccountServiceImpl.VerifyCodeClient = verifycodeservice.MustNewClient("CaptchaService", client.WithHostPorts("0.0.0.0:8000"))
 
-	svr := user.NewServer(
+	svr := user_account.NewServer(
 		userAccountServiceImpl,
 		server.WithServiceAddr(addr),
 	)

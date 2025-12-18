@@ -6,12 +6,13 @@ import (
 	"context"
 	client "github.com/cloudwego/kitex/client"
 	callopt "github.com/cloudwego/kitex/client/callopt"
-	user "github.com/youperceive/cloudwego_instance/rpc/user_account/kitex_gen/user"
+	user_account "github.com/youperceive/cloudwego_instance/rpc/user_account/kitex_gen/user_account"
 )
 
 // Client is designed to provide IDL-compatible methods with call-option parameter for kitex framework.
 type Client interface {
-	Register(ctx context.Context, req *user.RegisterRequest, callOptions ...callopt.Option) (r *user.RegisterResponse, err error)
+	Register(ctx context.Context, req *user_account.RegisterRequest, callOptions ...callopt.Option) (r *user_account.RegisterResponse, err error)
+	Login(ctx context.Context, req *user_account.LoginRequest, callOptions ...callopt.Option) (r *user_account.LoginResponse, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -43,7 +44,12 @@ type kUserAccountServiceClient struct {
 	*kClient
 }
 
-func (p *kUserAccountServiceClient) Register(ctx context.Context, req *user.RegisterRequest, callOptions ...callopt.Option) (r *user.RegisterResponse, err error) {
+func (p *kUserAccountServiceClient) Register(ctx context.Context, req *user_account.RegisterRequest, callOptions ...callopt.Option) (r *user_account.RegisterResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.Register(ctx, req)
+}
+
+func (p *kUserAccountServiceClient) Login(ctx context.Context, req *user_account.LoginRequest, callOptions ...callopt.Option) (r *user_account.LoginResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.Login(ctx, req)
 }

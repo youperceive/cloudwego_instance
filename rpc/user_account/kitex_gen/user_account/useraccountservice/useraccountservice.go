@@ -7,7 +7,7 @@ import (
 	"errors"
 	client "github.com/cloudwego/kitex/client"
 	kitex "github.com/cloudwego/kitex/pkg/serviceinfo"
-	user "github.com/youperceive/cloudwego_instance/rpc/user_account/kitex_gen/user"
+	user_account "github.com/youperceive/cloudwego_instance/rpc/user_account/kitex_gen/user_account"
 )
 
 var errInvalidMessageType = errors.New("invalid message type for service method handler")
@@ -17,6 +17,13 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		registerHandler,
 		newUserAccountServiceRegisterArgs,
 		newUserAccountServiceRegisterResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingNone),
+	),
+	"Login": kitex.NewMethodInfo(
+		loginHandler,
+		newUserAccountServiceLoginArgs,
+		newUserAccountServiceLoginResult,
 		false,
 		kitex.WithStreamingMode(kitex.StreamingNone),
 	),
@@ -58,7 +65,7 @@ func NewServiceInfoForStreamClient() *kitex.ServiceInfo {
 
 func newServiceInfo(hasStreaming bool, keepStreamingMethods bool, keepNonStreamingMethods bool) *kitex.ServiceInfo {
 	serviceName := "UserAccountService"
-	handlerType := (*user.UserAccountService)(nil)
+	handlerType := (*user_account.UserAccountService)(nil)
 	methods := map[string]kitex.MethodInfo{}
 	for name, m := range serviceMethods {
 		if m.IsStreaming() && !keepStreamingMethods {
@@ -70,7 +77,7 @@ func newServiceInfo(hasStreaming bool, keepStreamingMethods bool, keepNonStreami
 		methods[name] = m
 	}
 	extra := map[string]interface{}{
-		"PackageName": "user",
+		"PackageName": "user_account",
 	}
 	if hasStreaming {
 		extra["streaming"] = hasStreaming
@@ -87,9 +94,9 @@ func newServiceInfo(hasStreaming bool, keepStreamingMethods bool, keepNonStreami
 }
 
 func registerHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
-	realArg := arg.(*user.UserAccountServiceRegisterArgs)
-	realResult := result.(*user.UserAccountServiceRegisterResult)
-	success, err := handler.(user.UserAccountService).Register(ctx, realArg.Req)
+	realArg := arg.(*user_account.UserAccountServiceRegisterArgs)
+	realResult := result.(*user_account.UserAccountServiceRegisterResult)
+	success, err := handler.(user_account.UserAccountService).Register(ctx, realArg.Req)
 	if err != nil {
 		return err
 	}
@@ -97,11 +104,29 @@ func registerHandler(ctx context.Context, handler interface{}, arg, result inter
 	return nil
 }
 func newUserAccountServiceRegisterArgs() interface{} {
-	return user.NewUserAccountServiceRegisterArgs()
+	return user_account.NewUserAccountServiceRegisterArgs()
 }
 
 func newUserAccountServiceRegisterResult() interface{} {
-	return user.NewUserAccountServiceRegisterResult()
+	return user_account.NewUserAccountServiceRegisterResult()
+}
+
+func loginHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user_account.UserAccountServiceLoginArgs)
+	realResult := result.(*user_account.UserAccountServiceLoginResult)
+	success, err := handler.(user_account.UserAccountService).Login(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newUserAccountServiceLoginArgs() interface{} {
+	return user_account.NewUserAccountServiceLoginArgs()
+}
+
+func newUserAccountServiceLoginResult() interface{} {
+	return user_account.NewUserAccountServiceLoginResult()
 }
 
 type kClient struct {
@@ -114,11 +139,21 @@ func newServiceClient(c client.Client) *kClient {
 	}
 }
 
-func (p *kClient) Register(ctx context.Context, req *user.RegisterRequest) (r *user.RegisterResponse, err error) {
-	var _args user.UserAccountServiceRegisterArgs
+func (p *kClient) Register(ctx context.Context, req *user_account.RegisterRequest) (r *user_account.RegisterResponse, err error) {
+	var _args user_account.UserAccountServiceRegisterArgs
 	_args.Req = req
-	var _result user.UserAccountServiceRegisterResult
+	var _result user_account.UserAccountServiceRegisterResult
 	if err = p.c.Call(ctx, "Register", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) Login(ctx context.Context, req *user_account.LoginRequest) (r *user_account.LoginResponse, err error) {
+	var _args user_account.UserAccountServiceLoginArgs
+	_args.Req = req
+	var _result user_account.UserAccountServiceLoginResult
+	if err = p.c.Call(ctx, "Login", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

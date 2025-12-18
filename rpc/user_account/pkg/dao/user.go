@@ -2,10 +2,13 @@ package dao
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"time"
 
+	"github.com/youperceive/cloudwego_instance/rpc/user_account/kitex_gen/base"
 	"github.com/youperceive/cloudwego_instance/rpc/user_account/pkg/mysql"
+	"gorm.io/gorm"
 )
 
 type User struct {
@@ -40,4 +43,32 @@ func CreateUser(user *User) (int64, error) {
 	}
 
 	return user.ID, nil
+}
+
+func QueryUser(target string, targetType base.TargetType) (*User, error) {
+	if target == "" {
+		return nil, errors.New("query user failed: target is empty")
+	}
+	if targetType != base.TargetType_Email && targetType != base.TargetType_Phone {
+		return nil, errors.New("query user failed: invalid target type")
+	}
+
+	user := &User{}
+	var result *gorm.DB
+
+	switch targetType {
+	case base.TargetType_Phone:
+		result = mysql.DB.Model(&User{}).Where("phone = ?", target).First(user)
+	case base.TargetType_Email:
+		result = mysql.DB.Model(&User{}).Where("email = ?", target).First(user)
+	}
+
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, errors.New("query user from mysql failed: " + result.Error.Error())
+	}
+
+	return user, nil
 }

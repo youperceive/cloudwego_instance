@@ -7,9 +7,10 @@ import (
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	base "github.com/youperceive/cloudwego_instance/rpc/user_account/kitex_gen/base"
-	user "github.com/youperceive/cloudwego_instance/rpc/user_account/kitex_gen/user"
+	user_account "github.com/youperceive/cloudwego_instance/rpc/user_account/kitex_gen/user_account"
 	"github.com/youperceive/cloudwego_instance/rpc/user_account/pkg/dao"
 	"github.com/youperceive/cloudwego_instance/rpc/user_account/pkg/hash"
+	"github.com/youperceive/cloudwego_instance/rpc/user_account/pkg/token"
 
 	"github.com/youperceive/cloudwego_instance/rpc/verify_code/kitex_gen/verify_code"
 	"github.com/youperceive/cloudwego_instance/rpc/verify_code/kitex_gen/verify_code/verifycodeservice"
@@ -25,7 +26,7 @@ var (
 	successMsg     = "Success."
 )
 
-func validateRegisterReq(req *user.RegisterRequest) error {
+func validateRegisterReq(req *user_account.RegisterRequest) error {
 	var msg []string
 	if req.Target == "" || req.Captcha == "" || req.Password == "" {
 		msg = append(msg, "target, captcha or password is empty.")
@@ -40,7 +41,7 @@ func validateRegisterReq(req *user.RegisterRequest) error {
 }
 
 // Register implements the UserAccountServiceImpl interface.
-func (s *UserAccountServiceImpl) Register(ctx context.Context, req *user.RegisterRequest) (resp *user.RegisterResponse, err error) {
+func (s *UserAccountServiceImpl) Register(ctx context.Context, req *user_account.RegisterRequest) (resp *user_account.RegisterResponse, err error) {
 	klogErr := func(msg string) {
 		klog.Error(
 			"method", "Register",
@@ -51,7 +52,7 @@ func (s *UserAccountServiceImpl) Register(ctx context.Context, req *user.Registe
 
 	if err := validateRegisterReq(req); err != nil {
 		klogErr("fail to validate req params." + err.Error())
-		resp = &user.RegisterResponse{
+		resp = &user_account.RegisterResponse{
 			BaseResp: &base.BaseResponse{
 				Code: base.Code_INVALID_PARAM,
 				Msg:  err.Error(),
@@ -71,7 +72,7 @@ func (s *UserAccountServiceImpl) Register(ctx context.Context, req *user.Registe
 	captchaResp, err := s.VerifyCodeClient.ValidateCaptcha(ctx, captchaReq)
 	if err != nil {
 		klogErr("fail to call verifyCodeClient.ValidateCaptcha()" + err.Error())
-		resp = &user.RegisterResponse{
+		resp = &user_account.RegisterResponse{
 			BaseResp: &base.BaseResponse{
 				Code: base.Code_SERVICE_ERR,
 				Msg:  internalErrMsg,
@@ -86,7 +87,7 @@ func (s *UserAccountServiceImpl) Register(ctx context.Context, req *user.Registe
 			msg += captchaResp.BaseResp.Msg
 		}
 		klogErr(msg)
-		resp = &user.RegisterResponse{
+		resp = &user_account.RegisterResponse{
 			BaseResp: &base.BaseResponse{
 				Code: base.Code_INVALID_PARAM,
 				Msg:  "fail to validate captcha.",
@@ -99,7 +100,7 @@ func (s *UserAccountServiceImpl) Register(ctx context.Context, req *user.Registe
 	hashedPassword, err := hash.BCryptHash(req.Password)
 	if err != nil {
 		klogErr("fail to hash password." + err.Error())
-		resp = &user.RegisterResponse{
+		resp = &user_account.RegisterResponse{
 			BaseResp: &base.BaseResponse{
 				Code: base.Code_SERVICE_ERR,
 				Msg:  internalErrMsg,
@@ -125,7 +126,7 @@ func (s *UserAccountServiceImpl) Register(ctx context.Context, req *user.Registe
 	userID, err := dao.CreateUser(daoUser)
 	if err != nil {
 		klogErr("fail to create user." + err.Error())
-		resp = &user.RegisterResponse{
+		resp = &user_account.RegisterResponse{
 			BaseResp: &base.BaseResponse{
 				Code: base.Code_DB_ERR,
 				Msg:  internalErrMsg,
@@ -135,12 +136,109 @@ func (s *UserAccountServiceImpl) Register(ctx context.Context, req *user.Registe
 		return
 	}
 
-	resp = &user.RegisterResponse{
+	resp = &user_account.RegisterResponse{
 		BaseResp: &base.BaseResponse{
 			Code: base.Code_SUCCESS,
 			Msg:  successMsg,
 		},
 		UserId: &userID,
+	}
+
+	return
+}
+
+func validateLoginReq(req *user_account.LoginRequest) error {
+	var msg []string
+	if req.Target == "" || req.Password == "" {
+		msg = append(msg, "target or password is empty.")
+	}
+	if _, err := req.TargetType.Value(); err != nil {
+		msg = append(msg, "LoginType invalid.")
+	}
+	if len(msg) > 0 {
+		return fmt.Errorf("%s", strings.Join(msg, ". "))
+	}
+	return nil
+}
+
+// Login implements the UserAccountServiceImpl interface.
+func (s *UserAccountServiceImpl) Login(ctx context.Context, req *user_account.LoginRequest) (resp *user_account.LoginResponse, err error) {
+	klogErr := func(msg string) {
+		klog.Error(
+			"method", "Login",
+			"message", msg,
+			"target", req.Target,
+		)
+	}
+
+	err = validateLoginReq(req)
+	if err != nil {
+		klogErr("fail to validate req params." + err.Error())
+		resp = &user_account.LoginResponse{
+			BaseResp: &base.BaseResponse{
+				Code: base.Code_INVALID_PARAM,
+				Msg:  err.Error(),
+			},
+			Token: "",
+		}
+		return
+	}
+
+	user, err := dao.QueryUser(req.Target, req.TargetType)
+	if err != nil {
+		klogErr("fail to query user_id." + err.Error())
+		resp = &user_account.LoginResponse{
+			BaseResp: &base.BaseResponse{
+				Code: base.Code_DB_ERR,
+				Msg:  internalErrMsg,
+			},
+			Token: "",
+		}
+		return
+	}
+	if user == nil {
+		klogErr("user not existed.")
+		resp = &user_account.LoginResponse{
+			BaseResp: &base.BaseResponse{
+				Code: base.Code_INVALID_PARAM,
+				Msg:  "user not existed.",
+			},
+			Token: "",
+		}
+		return
+	}
+
+	if !hash.BCryptCompare(req.Password, user.Password) {
+		klogErr("incorrect password.")
+		resp = &user_account.LoginResponse{
+			BaseResp: &base.BaseResponse{
+				Code: base.Code_INVALID_PARAM,
+				Msg:  "incorrect password.",
+			},
+			Token: "",
+		}
+		return
+	}
+
+	accessToken, err := token.GenerateToken(user.ID, user.UserType)
+	if err != nil {
+		klogErr("fail to generate token." + err.Error())
+		resp = &user_account.LoginResponse{
+			BaseResp: &base.BaseResponse{
+				Code: base.Code_SERVICE_ERR,
+				Msg:  internalErrMsg,
+			},
+			Token: "",
+		}
+		return
+	}
+
+	resp = &user_account.LoginResponse{
+		BaseResp: &base.BaseResponse{
+			Code: base.Code_SUCCESS,
+			Msg:  successMsg,
+		},
+		Token: accessToken,
 	}
 
 	return

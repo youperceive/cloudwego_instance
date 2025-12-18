@@ -1,4 +1,4 @@
-namespace go user
+namespace go user_account
 
 include "../base/base.thrift"
 
@@ -24,7 +24,7 @@ struct RegisterRequest {
     1: optional string username,
     2: string target,               // phone or email, determined by register_type
     3: base.TargetType target_type,
-    4: string password,
+    4: string password,             // frontend need to transmit password after hash it
     5: string captcha,              // before register, need to get a captcha. can be arranged in frontend, not here
 }
 
@@ -33,6 +33,18 @@ struct RegisterResponse {
     2: optional i64 user_id,
 }
 
+struct LoginRequest {
+    1: string target,
+    2: base.TargetType target_type,
+    3: string password,             // frontend need to transmit password after hash it
+}
+
+struct LoginResponse {
+    1: base.BaseResponse baseResp,
+    2: string token,
+}
+
 service UserAccountService {
     RegisterResponse Register(1: RegisterRequest req),
+    LoginResponse Login(1: LoginRequest req),
 }

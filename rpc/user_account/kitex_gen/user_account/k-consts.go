@@ -1,4 +1,4 @@
-package user
+package user_account
 
 // KitexUnusedProtection is used to prevent 'imported and not used' error.
 var KitexUnusedProtection = struct{}{}
