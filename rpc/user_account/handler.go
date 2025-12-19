@@ -31,7 +31,7 @@ func validateRegisterReq(req *user_account.RegisterRequest) error {
 	if req.Target == "" || req.Captcha == "" || req.Password == "" {
 		msg = append(msg, "target, captcha or password is empty.")
 	}
-	if _, err := req.TargetType.Value(); err != nil {
+	if req.TargetType != base.TargetType_Email && req.TargetType != base.TargetType_Phone {
 		msg = append(msg, "RegisterType invalid.")
 	}
 	if len(msg) > 0 {
