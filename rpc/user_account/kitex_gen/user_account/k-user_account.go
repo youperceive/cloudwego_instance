@@ -114,7 +114,7 @@ func (p *User) FastRead(buf []byte) (int, error) {
 				}
 			}
 		case 6:
-			if fieldTypeId == thrift.I32 {
+			if fieldTypeId == thrift.BYTE {
 				l, err = p.FastReadField6(buf[offset:])
 				offset += l
 				if err != nil {
@@ -278,13 +278,12 @@ func (p *User) FastReadField5(buf []byte) (int, error) {
 func (p *User) FastReadField6(buf []byte) (int, error) {
 	offset := 0
 
-	var _field UserType
-	if v, l, err := thrift.Binary.ReadI32(buf[offset:]); err != nil {
+	var _field int8
+	if v, l, err := thrift.Binary.ReadByte(buf[offset:]); err != nil {
 		return offset, err
 	} else {
 		offset += l
-
-		_field = UserType(v)
+		_field = v
 	}
 	p.UserType = _field
 	return offset, nil
@@ -340,6 +339,7 @@ func (p *User) FastWriteNocopy(buf []byte, w thrift.NocopyWriter) int {
 	offset := 0
 	if p != nil {
 		offset += p.fastWriteField1(buf[offset:], w)
+		offset += p.fastWriteField6(buf[offset:], w)
 		offset += p.fastWriteField7(buf[offset:], w)
 		offset += p.fastWriteField8(buf[offset:], w)
 		offset += p.fastWriteField9(buf[offset:], w)
@@ -347,7 +347,6 @@ func (p *User) FastWriteNocopy(buf []byte, w thrift.NocopyWriter) int {
 		offset += p.fastWriteField3(buf[offset:], w)
 		offset += p.fastWriteField4(buf[offset:], w)
 		offset += p.fastWriteField5(buf[offset:], w)
-		offset += p.fastWriteField6(buf[offset:], w)
 	}
 	offset += thrift.Binary.WriteFieldStop(buf[offset:])
 	return offset
@@ -418,8 +417,8 @@ func (p *User) fastWriteField5(buf []byte, w thrift.NocopyWriter) int {
 func (p *User) fastWriteField6(buf []byte, w thrift.NocopyWriter) int {
 	offset := 0
 	if p.IsSetUserType() {
-		offset += thrift.Binary.WriteFieldBegin(buf[offset:], thrift.I32, 6)
-		offset += thrift.Binary.WriteI32(buf[offset:], int32(p.UserType))
+		offset += thrift.Binary.WriteFieldBegin(buf[offset:], thrift.BYTE, 6)
+		offset += thrift.Binary.WriteByte(buf[offset:], p.UserType)
 	}
 	return offset
 }
@@ -498,7 +497,7 @@ func (p *User) field6Length() int {
 	l := 0
 	if p.IsSetUserType() {
 		l += thrift.Binary.FieldBeginLength()
-		l += thrift.Binary.I32Length()
+		l += thrift.Binary.ByteLength()
 	}
 	return l
 }
@@ -617,6 +616,20 @@ func (p *RegisterRequest) FastRead(buf []byte) (int, error) {
 					goto SkipFieldError
 				}
 			}
+		case 6:
+			if fieldTypeId == thrift.BYTE {
+				l, err = p.FastReadField6(buf[offset:])
+				offset += l
+				if err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				l, err = thrift.Binary.Skip(buf[offset:], fieldTypeId)
+				offset += l
+				if err != nil {
+					goto SkipFieldError
+				}
+			}
 		default:
 			l, err = thrift.Binary.Skip(buf[offset:], fieldTypeId)
 			offset += l
@@ -706,6 +719,20 @@ func (p *RegisterRequest) FastReadField5(buf []byte) (int, error) {
 	return offset, nil
 }
 
+func (p *RegisterRequest) FastReadField6(buf []byte) (int, error) {
+	offset := 0
+
+	var _field int8
+	if v, l, err := thrift.Binary.ReadByte(buf[offset:]); err != nil {
+		return offset, err
+	} else {
+		offset += l
+		_field = v
+	}
+	p.UserType = _field
+	return offset, nil
+}
+
 func (p *RegisterRequest) FastWrite(buf []byte) int {
 	return p.FastWriteNocopy(buf, nil)
 }
@@ -713,6 +740,7 @@ func (p *RegisterRequest) FastWrite(buf []byte) int {
 func (p *RegisterRequest) FastWriteNocopy(buf []byte, w thrift.NocopyWriter) int {
 	offset := 0
 	if p != nil {
+		offset += p.fastWriteField6(buf[offset:], w)
 		offset += p.fastWriteField1(buf[offset:], w)
 		offset += p.fastWriteField2(buf[offset:], w)
 		offset += p.fastWriteField3(buf[offset:], w)
@@ -731,6 +759,7 @@ func (p *RegisterRequest) BLength() int {
 		l += p.field3Length()
 		l += p.field4Length()
 		l += p.field5Length()
+		l += p.field6Length()
 	}
 	l += thrift.Binary.FieldStopLength()
 	return l
@@ -773,6 +802,15 @@ func (p *RegisterRequest) fastWriteField5(buf []byte, w thrift.NocopyWriter) int
 	return offset
 }
 
+func (p *RegisterRequest) fastWriteField6(buf []byte, w thrift.NocopyWriter) int {
+	offset := 0
+	if p.IsSetUserType() {
+		offset += thrift.Binary.WriteFieldBegin(buf[offset:], thrift.BYTE, 6)
+		offset += thrift.Binary.WriteByte(buf[offset:], p.UserType)
+	}
+	return offset
+}
+
 func (p *RegisterRequest) field1Length() int {
 	l := 0
 	if p.IsSetUsername() {
@@ -807,6 +845,15 @@ func (p *RegisterRequest) field5Length() int {
 	l := 0
 	l += thrift.Binary.FieldBeginLength()
 	l += thrift.Binary.StringLengthNocopy(p.Captcha)
+	return l
+}
+
+func (p *RegisterRequest) field6Length() int {
+	l := 0
+	if p.IsSetUserType() {
+		l += thrift.Binary.FieldBeginLength()
+		l += thrift.Binary.ByteLength()
+	}
 	return l
 }
 

@@ -4,58 +4,9 @@ package user_account
 
 import (
 	"context"
-	"database/sql"
-	"database/sql/driver"
 	"fmt"
 	"github.com/youperceive/cloudwego_instance/rpc/user_account/kitex_gen/base"
 )
-
-type UserType int64
-
-const (
-	UserType_USER        UserType = 1
-	UserType_ADMIN       UserType = 2
-	UserType_THIRD_PARTY UserType = 3
-)
-
-func (p UserType) String() string {
-	switch p {
-	case UserType_USER:
-		return "USER"
-	case UserType_ADMIN:
-		return "ADMIN"
-	case UserType_THIRD_PARTY:
-		return "THIRD_PARTY"
-	}
-	return "<UNSET>"
-}
-
-func UserTypeFromString(s string) (UserType, error) {
-	switch s {
-	case "USER":
-		return UserType_USER, nil
-	case "ADMIN":
-		return UserType_ADMIN, nil
-	case "THIRD_PARTY":
-		return UserType_THIRD_PARTY, nil
-	}
-	return UserType(0), fmt.Errorf("not a valid UserType string")
-}
-
-func UserTypePtr(v UserType) *UserType { return &v }
-func (p *UserType) Scan(value interface{}) (err error) {
-	var result sql.NullInt64
-	err = result.Scan(value)
-	*p = UserType(result.Int64)
-	return
-}
-
-func (p *UserType) Value() (driver.Value, error) {
-	if p == nil {
-		return nil, nil
-	}
-	return int64(*p), nil
-}
 
 type User struct {
 	Id        int64             `thrift:"id,1" frugal:"1,default,i64" json:"id"`
@@ -63,7 +14,7 @@ type User struct {
 	Email     string            `thrift:"email,3" frugal:"3,default,string" json:"email"`
 	Phone     string            `thrift:"phone,4" frugal:"4,default,string" json:"phone"`
 	Ext       map[string]string `thrift:"ext,5,optional" frugal:"5,optional,map<string:string>" json:"ext,omitempty"`
-	UserType  UserType          `thrift:"user_type,6,optional" frugal:"6,optional,UserType" json:"user_type,omitempty"`
+	UserType  int8              `thrift:"user_type,6,optional" frugal:"6,optional,i8" json:"user_type,omitempty"`
 	CreatedAt *int64            `thrift:"created_at,7,optional" frugal:"7,optional,i64" json:"created_at,omitempty"`
 	UpdatedAt *int64            `thrift:"updated_at,8,optional" frugal:"8,optional,i64" json:"updated_at,omitempty"`
 	Status    int32             `thrift:"status,9,optional" frugal:"9,optional,i32" json:"status,omitempty"`
@@ -72,14 +23,14 @@ type User struct {
 func NewUser() *User {
 	return &User{
 		Ext:      map[string]string{},
-		UserType: UserType_USER,
+		UserType: 1,
 		Status:   1,
 	}
 }
 
 func (p *User) InitDefault() {
 	p.Ext = map[string]string{}
-	p.UserType = UserType_USER
+	p.UserType = 1
 	p.Status = 1
 }
 
@@ -108,9 +59,9 @@ func (p *User) GetExt() (v map[string]string) {
 	return p.Ext
 }
 
-var User_UserType_DEFAULT UserType = UserType_USER
+var User_UserType_DEFAULT int8 = 1
 
-func (p *User) GetUserType() (v UserType) {
+func (p *User) GetUserType() (v int8) {
 	if !p.IsSetUserType() {
 		return User_UserType_DEFAULT
 	}
@@ -158,7 +109,7 @@ func (p *User) SetPhone(val string) {
 func (p *User) SetExt(val map[string]string) {
 	p.Ext = val
 }
-func (p *User) SetUserType(val UserType) {
+func (p *User) SetUserType(val int8) {
 	p.UserType = val
 }
 func (p *User) SetCreatedAt(val *int64) {
@@ -216,13 +167,17 @@ type RegisterRequest struct {
 	TargetType base.TargetType `thrift:"target_type,3" frugal:"3,default,TargetType" json:"target_type"`
 	Password   string          `thrift:"password,4" frugal:"4,default,string" json:"password"`
 	Captcha    string          `thrift:"captcha,5" frugal:"5,default,string" json:"captcha"`
+	UserType   int8            `thrift:"user_type,6,optional" frugal:"6,optional,i8" json:"user_type,omitempty"`
 }
 
 func NewRegisterRequest() *RegisterRequest {
-	return &RegisterRequest{}
+	return &RegisterRequest{
+		UserType: 1,
+	}
 }
 
 func (p *RegisterRequest) InitDefault() {
+	p.UserType = 1
 }
 
 var RegisterRequest_Username_DEFAULT string
@@ -249,6 +204,15 @@ func (p *RegisterRequest) GetPassword() (v string) {
 func (p *RegisterRequest) GetCaptcha() (v string) {
 	return p.Captcha
 }
+
+var RegisterRequest_UserType_DEFAULT int8 = 1
+
+func (p *RegisterRequest) GetUserType() (v int8) {
+	if !p.IsSetUserType() {
+		return RegisterRequest_UserType_DEFAULT
+	}
+	return p.UserType
+}
 func (p *RegisterRequest) SetUsername(val *string) {
 	p.Username = val
 }
@@ -264,9 +228,16 @@ func (p *RegisterRequest) SetPassword(val string) {
 func (p *RegisterRequest) SetCaptcha(val string) {
 	p.Captcha = val
 }
+func (p *RegisterRequest) SetUserType(val int8) {
+	p.UserType = val
+}
 
 func (p *RegisterRequest) IsSetUsername() bool {
 	return p.Username != nil
+}
+
+func (p *RegisterRequest) IsSetUserType() bool {
+	return p.UserType != RegisterRequest_UserType_DEFAULT
 }
 
 func (p *RegisterRequest) String() string {
@@ -282,6 +253,7 @@ var fieldIDToName_RegisterRequest = map[int16]string{
 	3: "target_type",
 	4: "password",
 	5: "captcha",
+	6: "user_type",
 }
 
 type RegisterResponse struct {
