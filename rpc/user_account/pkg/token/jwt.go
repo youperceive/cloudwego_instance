@@ -17,11 +17,11 @@ var (
 func getSecretKey() string {
 	key := os.Getenv("JWT_SECRETKEY")
 	if key == "" {
-		klog.Warn("token/jwt", "not find env param $JWT_SECRETKEY, has been replaced by 'temprory key'")
+		klog.Warn("token/jwt:", "not find env param $JWT_SECRETKEY, has been replaced by 'temprory key'")
 		key = "temprory key"
 	}
 	if len(key) < 32 {
-		klog.Warn("token/jwt", "length of secret_key is less than 32, suggested more than 32")
+		klog.Warn("token/jwt:", "length of secret_key is less than 32, suggested more than 32")
 	}
 	return key
 }
