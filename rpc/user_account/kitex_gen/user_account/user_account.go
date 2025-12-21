@@ -406,10 +406,196 @@ var fieldIDToName_LoginResponse = map[int16]string{
 	2: "token",
 }
 
+type UpdateRequest struct {
+	Id       *int64  `thrift:"id,1,optional" frugal:"1,optional,i64" json:"id,omitempty"`
+	Username *string `thrift:"username,2,optional" frugal:"2,optional,string" json:"username,omitempty"`
+	Email    *string `thrift:"email,3,optional" frugal:"3,optional,string" json:"email,omitempty"`
+	Phone    *string `thrift:"phone,4,optional" frugal:"4,optional,string" json:"phone,omitempty"`
+	Password *string `thrift:"password,5,optional" frugal:"5,optional,string" json:"password,omitempty"`
+	UserType *int8   `thrift:"user_type,6,optional" frugal:"6,optional,i8" json:"user_type,omitempty"`
+	Status   *int32  `thrift:"status,7,optional" frugal:"7,optional,i32" json:"status,omitempty"`
+}
+
+func NewUpdateRequest() *UpdateRequest {
+	return &UpdateRequest{}
+}
+
+func (p *UpdateRequest) InitDefault() {
+}
+
+var UpdateRequest_Id_DEFAULT int64
+
+func (p *UpdateRequest) GetId() (v int64) {
+	if !p.IsSetId() {
+		return UpdateRequest_Id_DEFAULT
+	}
+	return *p.Id
+}
+
+var UpdateRequest_Username_DEFAULT string
+
+func (p *UpdateRequest) GetUsername() (v string) {
+	if !p.IsSetUsername() {
+		return UpdateRequest_Username_DEFAULT
+	}
+	return *p.Username
+}
+
+var UpdateRequest_Email_DEFAULT string
+
+func (p *UpdateRequest) GetEmail() (v string) {
+	if !p.IsSetEmail() {
+		return UpdateRequest_Email_DEFAULT
+	}
+	return *p.Email
+}
+
+var UpdateRequest_Phone_DEFAULT string
+
+func (p *UpdateRequest) GetPhone() (v string) {
+	if !p.IsSetPhone() {
+		return UpdateRequest_Phone_DEFAULT
+	}
+	return *p.Phone
+}
+
+var UpdateRequest_Password_DEFAULT string
+
+func (p *UpdateRequest) GetPassword() (v string) {
+	if !p.IsSetPassword() {
+		return UpdateRequest_Password_DEFAULT
+	}
+	return *p.Password
+}
+
+var UpdateRequest_UserType_DEFAULT int8
+
+func (p *UpdateRequest) GetUserType() (v int8) {
+	if !p.IsSetUserType() {
+		return UpdateRequest_UserType_DEFAULT
+	}
+	return *p.UserType
+}
+
+var UpdateRequest_Status_DEFAULT int32
+
+func (p *UpdateRequest) GetStatus() (v int32) {
+	if !p.IsSetStatus() {
+		return UpdateRequest_Status_DEFAULT
+	}
+	return *p.Status
+}
+func (p *UpdateRequest) SetId(val *int64) {
+	p.Id = val
+}
+func (p *UpdateRequest) SetUsername(val *string) {
+	p.Username = val
+}
+func (p *UpdateRequest) SetEmail(val *string) {
+	p.Email = val
+}
+func (p *UpdateRequest) SetPhone(val *string) {
+	p.Phone = val
+}
+func (p *UpdateRequest) SetPassword(val *string) {
+	p.Password = val
+}
+func (p *UpdateRequest) SetUserType(val *int8) {
+	p.UserType = val
+}
+func (p *UpdateRequest) SetStatus(val *int32) {
+	p.Status = val
+}
+
+func (p *UpdateRequest) IsSetId() bool {
+	return p.Id != nil
+}
+
+func (p *UpdateRequest) IsSetUsername() bool {
+	return p.Username != nil
+}
+
+func (p *UpdateRequest) IsSetEmail() bool {
+	return p.Email != nil
+}
+
+func (p *UpdateRequest) IsSetPhone() bool {
+	return p.Phone != nil
+}
+
+func (p *UpdateRequest) IsSetPassword() bool {
+	return p.Password != nil
+}
+
+func (p *UpdateRequest) IsSetUserType() bool {
+	return p.UserType != nil
+}
+
+func (p *UpdateRequest) IsSetStatus() bool {
+	return p.Status != nil
+}
+
+func (p *UpdateRequest) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("UpdateRequest(%+v)", *p)
+}
+
+var fieldIDToName_UpdateRequest = map[int16]string{
+	1: "id",
+	2: "username",
+	3: "email",
+	4: "phone",
+	5: "password",
+	6: "user_type",
+	7: "status",
+}
+
+type UpdateResponse struct {
+	BaseResp *base.BaseResponse `thrift:"baseResp,1" frugal:"1,default,base.BaseResponse" json:"baseResp"`
+}
+
+func NewUpdateResponse() *UpdateResponse {
+	return &UpdateResponse{}
+}
+
+func (p *UpdateResponse) InitDefault() {
+}
+
+var UpdateResponse_BaseResp_DEFAULT *base.BaseResponse
+
+func (p *UpdateResponse) GetBaseResp() (v *base.BaseResponse) {
+	if !p.IsSetBaseResp() {
+		return UpdateResponse_BaseResp_DEFAULT
+	}
+	return p.BaseResp
+}
+func (p *UpdateResponse) SetBaseResp(val *base.BaseResponse) {
+	p.BaseResp = val
+}
+
+func (p *UpdateResponse) IsSetBaseResp() bool {
+	return p.BaseResp != nil
+}
+
+func (p *UpdateResponse) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("UpdateResponse(%+v)", *p)
+}
+
+var fieldIDToName_UpdateResponse = map[int16]string{
+	1: "baseResp",
+}
+
 type UserAccountService interface {
 	Register(ctx context.Context, req *RegisterRequest) (r *RegisterResponse, err error)
 
 	Login(ctx context.Context, req *LoginRequest) (r *LoginResponse, err error)
+
+	Update(ctx context.Context, req *UpdateRequest) (r *UpdateResponse, err error)
 }
 
 type UserAccountServiceRegisterArgs struct {
@@ -561,5 +747,81 @@ func (p *UserAccountServiceLoginResult) String() string {
 }
 
 var fieldIDToName_UserAccountServiceLoginResult = map[int16]string{
+	0: "success",
+}
+
+type UserAccountServiceUpdateArgs struct {
+	Req *UpdateRequest `thrift:"req,1" frugal:"1,default,UpdateRequest" json:"req"`
+}
+
+func NewUserAccountServiceUpdateArgs() *UserAccountServiceUpdateArgs {
+	return &UserAccountServiceUpdateArgs{}
+}
+
+func (p *UserAccountServiceUpdateArgs) InitDefault() {
+}
+
+var UserAccountServiceUpdateArgs_Req_DEFAULT *UpdateRequest
+
+func (p *UserAccountServiceUpdateArgs) GetReq() (v *UpdateRequest) {
+	if !p.IsSetReq() {
+		return UserAccountServiceUpdateArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+func (p *UserAccountServiceUpdateArgs) SetReq(val *UpdateRequest) {
+	p.Req = val
+}
+
+func (p *UserAccountServiceUpdateArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *UserAccountServiceUpdateArgs) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("UserAccountServiceUpdateArgs(%+v)", *p)
+}
+
+var fieldIDToName_UserAccountServiceUpdateArgs = map[int16]string{
+	1: "req",
+}
+
+type UserAccountServiceUpdateResult struct {
+	Success *UpdateResponse `thrift:"success,0,optional" frugal:"0,optional,UpdateResponse" json:"success,omitempty"`
+}
+
+func NewUserAccountServiceUpdateResult() *UserAccountServiceUpdateResult {
+	return &UserAccountServiceUpdateResult{}
+}
+
+func (p *UserAccountServiceUpdateResult) InitDefault() {
+}
+
+var UserAccountServiceUpdateResult_Success_DEFAULT *UpdateResponse
+
+func (p *UserAccountServiceUpdateResult) GetSuccess() (v *UpdateResponse) {
+	if !p.IsSetSuccess() {
+		return UserAccountServiceUpdateResult_Success_DEFAULT
+	}
+	return p.Success
+}
+func (p *UserAccountServiceUpdateResult) SetSuccess(x interface{}) {
+	p.Success = x.(*UpdateResponse)
+}
+
+func (p *UserAccountServiceUpdateResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *UserAccountServiceUpdateResult) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("UserAccountServiceUpdateResult(%+v)", *p)
+}
+
+var fieldIDToName_UserAccountServiceUpdateResult = map[int16]string{
 	0: "success",
 }

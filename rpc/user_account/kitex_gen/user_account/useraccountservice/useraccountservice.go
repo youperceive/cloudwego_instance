@@ -27,6 +27,13 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingNone),
 	),
+	"Update": kitex.NewMethodInfo(
+		updateHandler,
+		newUserAccountServiceUpdateArgs,
+		newUserAccountServiceUpdateResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingNone),
+	),
 }
 
 var (
@@ -129,6 +136,24 @@ func newUserAccountServiceLoginResult() interface{} {
 	return user_account.NewUserAccountServiceLoginResult()
 }
 
+func updateHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*user_account.UserAccountServiceUpdateArgs)
+	realResult := result.(*user_account.UserAccountServiceUpdateResult)
+	success, err := handler.(user_account.UserAccountService).Update(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newUserAccountServiceUpdateArgs() interface{} {
+	return user_account.NewUserAccountServiceUpdateArgs()
+}
+
+func newUserAccountServiceUpdateResult() interface{} {
+	return user_account.NewUserAccountServiceUpdateResult()
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -154,6 +179,16 @@ func (p *kClient) Login(ctx context.Context, req *user_account.LoginRequest) (r 
 	_args.Req = req
 	var _result user_account.UserAccountServiceLoginResult
 	if err = p.c.Call(ctx, "Login", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) Update(ctx context.Context, req *user_account.UpdateRequest) (r *user_account.UpdateResponse, err error) {
+	var _args user_account.UserAccountServiceUpdateArgs
+	_args.Req = req
+	var _result user_account.UserAccountServiceUpdateResult
+	if err = p.c.Call(ctx, "Update", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

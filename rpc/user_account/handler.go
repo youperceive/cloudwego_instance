@@ -243,3 +243,124 @@ func (s *UserAccountServiceImpl) Login(ctx context.Context, req *user_account.Lo
 
 	return
 }
+
+func validateUpdateReq(req *user_account.UpdateRequest) error {
+	var errMsgs []string
+	if req.Id == nil {
+		errMsgs = append(errMsgs, "user_id is nil.")
+		return fmt.Errorf("%s", strings.Join(errMsgs, ". "))
+	}
+
+	user, err := dao.QueryUserById(*req.Id)
+	if err != nil {
+		klog.Error("method: ", "Update", "msg:", "can't acquire register_type by sql. "+err.Error())
+		errMsgs = append(errMsgs, internalErrMsg)
+		return fmt.Errorf("%s", strings.Join(errMsgs, ". "))
+	}
+	if user.RegisterType == int8(base.TargetType_Phone) && req.Phone != nil {
+		errMsgs = append(errMsgs, "can't modify register_type info:phone.")
+	} else if user.RegisterType == int8(base.TargetType_Email) && req.Email != nil {
+		errMsgs = append(errMsgs, "can't modify register_type info:email.")
+	}
+
+	if req.Username != nil && len(*req.Username) == 0 {
+		errMsgs = append(errMsgs, "username can't be empty.")
+	}
+	if req.Email != nil && len(*req.Email) == 0 {
+		errMsgs = append(errMsgs, "email can't be empty.")
+	}
+	if req.Phone != nil && len(*req.Phone) == 0 {
+		errMsgs = append(errMsgs, "phone can't be empty.")
+	}
+	if req.Password != nil && len(*req.Password) == 0 {
+		errMsgs = append(errMsgs, "password can't be empty.")
+	}
+
+	// reserved to validate email and phone format
+
+	if len(errMsgs) > 0 {
+		return fmt.Errorf("%s", strings.Join(errMsgs, ". "))
+	}
+	return nil
+}
+
+// Update implements the UserAccountServiceImpl interface.
+func (s *UserAccountServiceImpl) Update(ctx context.Context, req *user_account.UpdateRequest) (resp *user_account.UpdateResponse, err error) {
+
+	klogTarget := int64(0)
+	if req.Id != nil {
+		klogTarget = *req.Id
+	}
+	klogErr := func(msg string) {
+		klog.Error(
+			"method", "Update",
+			"message", msg,
+			"target", klogTarget,
+		)
+	}
+
+	err = validateUpdateReq(req)
+	if err != nil {
+		klogErr("fail to validate params. " + err.Error())
+		resp = &user_account.UpdateResponse{
+			BaseResp: &base.BaseResponse{
+				Code: base.Code_INVALID_PARAM,
+				Msg:  err.Error(),
+			},
+		}
+		return
+	}
+
+	info := make(map[string]any)
+	if req.Username != nil {
+		info["username"] = *req.Username
+	}
+	if req.Email != nil {
+		info["email"] = *req.Email
+	}
+	if req.Phone != nil {
+		info["phone"] = *req.Phone
+	}
+	if req.Password != nil {
+		// remember hash
+		hashedPassword, err := hash.BCryptHash(*req.Password)
+		if err != nil {
+			klogErr("fail to hash password. " + err.Error())
+			resp = &user_account.UpdateResponse{
+				BaseResp: &base.BaseResponse{
+					Code: base.Code_SERVICE_ERR,
+					Msg:  internalErrMsg,
+				},
+			}
+			return resp, err
+		}
+		info["password"] = hashedPassword
+	}
+	if req.UserType != nil {
+		info["user_type"] = *req.UserType
+	}
+	if req.Status != nil {
+		info["status"] = *req.Status
+	}
+
+	err = dao.UpdateUser(*req.Id, info)
+	if err != nil {
+		klogErr("fail to call dao.UpdateUser. " + err.Error())
+		resp = &user_account.UpdateResponse{
+			BaseResp: &base.BaseResponse{
+				Code: base.Code_DB_ERR,
+				Msg:  internalErrMsg,
+			},
+		}
+		return
+	}
+
+	resp = &user_account.UpdateResponse{
+		BaseResp: &base.BaseResponse{
+			Code: base.Code_SUCCESS,
+			Msg:  successMsg,
+		},
+	}
+
+	return
+}

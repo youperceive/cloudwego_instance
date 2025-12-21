@@ -39,7 +39,25 @@ struct LoginResponse {
     2: string token,
 }
 
+// The jwt token that include user_id can be acquired by http gateway,
+// so the param is id, not token.
+// Can't modify the register_type queried by sql, like phone or email.
+struct UpdateRequest {
+    1: optional i64 id,
+    2: optional string username,
+    3: optional string email,
+    4: optional string phone,
+    5: optional string password,
+    6: optional i8 user_type,
+    7: optional i32 status,
+}
+
+struct UpdateResponse {
+    1: base.BaseResponse baseResp,
+}
+
 service UserAccountService {
     RegisterResponse Register(1: RegisterRequest req),
     LoginResponse Login(1: LoginRequest req),
+    UpdateResponse Update(1: UpdateRequest req),
 }
