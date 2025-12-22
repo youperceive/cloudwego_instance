@@ -3,4 +3,5 @@ go 1.22.2
 use (
 	./rpc/verify_code // 验证码模块
 	./rpc/user_account // 用户账户模块
+	./rpc/order // 订单模块
 )

@@ -1,0 +1,29 @@
+networks:
+  order_service_network:
+    driver: bridge
+
+services:
+  mongo:
+    image: docker.xuanyuan.run/mongodb/mongodb-community-server:7.0-ubi8
+    container_name: order-mongo
+    user: "999:999" # 必须保留：适配容器内 mongodb 用户
+    ports:
+      - "27017:27017"
+    volumes:
+      # 核心修改：挂载到 ~/proj/data 下
+      - /home/alfredgit/proj/data/mongo/order/data:/data/db:rw
+      - /home/alfredgit/proj/data/mongo/order/config:/etc/mongod:ro
+      - /home/alfredgit/proj/data/mongo/order/log:/var/log/mongodb:rw
+    environment:
+      - MONGODB_INITDB_ROOT_USERNAME=root
+      - MONGODB_INITDB_ROOT_PASSWORD=root123456
+      - MONGODB_INITDB_DATABASE=order_db
+    command: [ "--bind_ip_all", "--dbpath", "/data/db", "--logpath", "/var/log/mongodb/mongod.log" ]
+    networks:
+      - order_service_network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
