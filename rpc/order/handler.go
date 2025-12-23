@@ -140,7 +140,7 @@ func (s *OrderServiceImpl) Update(ctx context.Context, req *order.UpdateRequest)
 
 	val := bson.D{
 		bson.E{
-			Key:   "updated_at",
+			Key:   "order.updatedat",
 			Value: time.Now().Unix(),
 		},
 	}
@@ -148,12 +148,12 @@ func (s *OrderServiceImpl) Update(ctx context.Context, req *order.UpdateRequest)
 		val = append(
 			val,
 			bson.E{
-				Key:   "status",
+				Key:   "order.status",
 				Value: *req.Status,
 			},
 		)
 	}
-	blackList := map[string]bool{"_id": true, "updated_at": true, "status": true, "req_user_id": true}
+	blackList := map[string]bool{"_id": true, "order.updatedat": true, "order.status": true, "order.requserid": true}
 	for k, v := range req.Ext {
 		if !blackList[k] {
 			val = append(
@@ -350,11 +350,11 @@ func (s *OrderServiceImpl) QueryOrderId(ctx context.Context, req *order.QueryOrd
 	var filter bson.M
 	switch req.Type {
 	case order.QueryOrderIdType_REQ_USER:
-		filter = bson.M{"req_user_id": *req.UserId}
+		filter = bson.M{"order.requserid": *req.UserId}
 	case order.QueryOrderIdType_RESP_USER:
-		filter = bson.M{"resp_user_id": *req.UserId}
+		filter = bson.M{"order.respuserid": *req.UserId}
 	case order.QueryOrderIdType_EXT_KEY:
-		filter = bson.M{*req.ExtKey: *req.ExtVal}
+		filter = bson.M{"ext." + *req.ExtKey: *req.ExtVal}
 	}
 
 	skip := (req.Page - 1) * req.PageSize
