@@ -92,8 +92,8 @@ struct QueryOrderIdResponse {
 }
 
 service OrderService {
-    CreateResponse Create(1: CreateRequest req),
-    UpdateResponse Update(1: UpdateRequest req),
-    QueryOrderInfoResponse QueryOrderInfo(1: QueryOrderInfoRequest req),
-    QueryOrderIdResponse QueryOrderId(1: QueryOrderIdRequest req),
+    CreateResponse Create(1: CreateRequest req) (api.post = "/create"),
+    UpdateResponse Update(1: UpdateRequest req) (api.post = "/update"),
+    QueryOrderInfoResponse QueryOrderInfo(1: QueryOrderInfoRequest req) (api.post = "/query_order_info"),
+    QueryOrderIdResponse QueryOrderId(1: QueryOrderIdRequest req) (api.post = "/query_order_id"),
 }

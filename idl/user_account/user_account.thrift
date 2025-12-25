@@ -57,7 +57,7 @@ struct UpdateResponse {
 }
 
 service UserAccountService {
-    RegisterResponse Register(1: RegisterRequest req),
-    LoginResponse Login(1: LoginRequest req),
-    UpdateResponse Update(1: UpdateRequest req),
+    RegisterResponse Register(1: RegisterRequest req) (api.post = "user/register"),
+    LoginResponse Login(1: LoginRequest req) (api.post = "user/login"),
+    UpdateResponse Update(1: UpdateRequest req) (api.post = "user/update"),
 }

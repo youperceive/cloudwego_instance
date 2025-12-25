@@ -1,0 +1,18 @@
+{
+    "type": 1,
+    "status": 1,
+    "req_user_id": 100001,
+    "resp_user_id": 100002,
+    "items": [
+        {
+            "product_id": 50001,
+            "sku_id": 60001,
+            "count": 2,
+            "price": 99900,
+            "ext": {
+                "product_name": "小米14手机",
+                "sku_name": "黑色|12GB+256GB"
+            }
+        }
+    ]
+}

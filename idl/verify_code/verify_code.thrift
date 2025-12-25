@@ -35,6 +35,8 @@ struct ValidateCaptchaResponse {
 }
 
 service VerifyCodeService {
-    GenerateCaptchaResponse GenerateCaptcha(1: GenerateCaptchaRequest req),
+    // 有时候我想透传一些服务，所以加上 api 注解
+    // 但显然另一些是不该暴露给前端的
+    GenerateCaptchaResponse GenerateCaptcha(1: GenerateCaptchaRequest req) (api.post = "/verify_code/generate"),
     ValidateCaptchaResponse ValidateCaptcha(1: ValidateCaptchaRequest req),
 }

@@ -1,0 +1,115 @@
+services:
+  redis:
+    image: docker.xuanyuan.run/ubuntu/redis:5.0-20.04_edge
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    restart: always
+    environment:
+      - ALLOW_EMPTY_PASSWORD=true
+    networks:
+      - hertz-network
+
+  verify-code-service:
+    image: verify-code-service:latest
+    environment:
+      - PRINT_CAPTCHA=true
+      - REDIS_ADDR=redis:6379
+    depends_on:
+      - redis
+    restart: always
+    ports:
+      - "8000:8000"
+    networks:
+      - hertz-network
+
+  mysql:
+    image: docker.xuanyuan.run/ubuntu/mysql:8.0-20.04_beta
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - /home/alfredgit/proj/cloudwego_instance/rpc/user_account/pkg/dao/sql/:/docker-entrypoint-initdb.d/
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=user_account_db
+      - MYSQL_USER=user_service
+      - MYSQL_PASSWORD=user123456
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time_zone=+8:00
+      - --default-authentication-plugin=mysql_native_password
+    networks:
+      - hertz-network
+
+  user-account-service:
+    image: user-account-service:latest
+    ports:
+      - "8001:8001"
+    environment:
+      - MYSQL_DSN=user_service:user123456@tcp(mysql:3306)/user_account_db?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai
+      - REDIS_ADDR=redis:6379
+      - VERIFY_CODE_SERVICE_ADDR=verify-code-service:8000
+      - JWT_SECRETKEY=abcdefghijklmnopqrstuvwxyz1234567890abcdef
+    depends_on:
+      - mysql
+      - redis
+      - verify-code-service
+    restart: always
+    networks:
+      - hertz-network
+
+  mongo:
+    image: docker.xuanyuan.run/mongodb/mongodb-community-server:7.0-ubi8
+    container_name: order-mongo
+    user: "999:999"
+    ports:
+      - "27017:27017"
+    volumes:
+      - /home/alfredgit/proj/data/mongo/order/data:/data/db:rw
+      - /home/alfredgit/proj/data/mongo/order/config:/etc/mongod:ro
+      - /home/alfredgit/proj/data/mongo/order/log:/var/log/mongodb:rw
+    environment:
+      - MONGODB_INITDB_ROOT_USERNAME=root
+      - MONGODB_INITDB_ROOT_PASSWORD=root123456
+      - MONGODB_INITDB_DATABASE=order_db
+      - TZ=Asia/Shanghai
+    command: [ "--bind_ip_all", "--dbpath", "/data/db", "--logpath", "/var/log/mongodb/mongod.log" ]
+    networks:
+      - hertz-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+
+  order-service:
+    image: order-service:latest
+    ports:
+      - "8002:8002"
+    environment:
+      - MONGODB_URI=mongodb://root:root123456@mongo:27017/order_db?authSource=admin
+      - TZ=Asia/Shanghai
+    depends_on:
+      - mongo
+    restart: always
+    networks:
+      - hertz-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+networks:
+  hertz-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+  mysql-data:
