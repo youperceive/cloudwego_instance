@@ -47,7 +47,7 @@ func Create(ctx context.Context, c *app.RequestContext) {
 		c.JSON(consts.StatusInternalServerError, &order.CreateResponse{
 			BaseResp: &base.BaseResponse{
 				Code: base.Code_SERVICE_ERR,
-				Msg:  "token 解析失败. Internal Error",
+				Msg:  "token.userId 不存在. Internal Error",
 			},
 		})
 		return
@@ -57,7 +57,7 @@ func Create(ctx context.Context, c *app.RequestContext) {
 		c.JSON(consts.StatusInternalServerError, &order.CreateResponse{
 			BaseResp: &base.BaseResponse{
 				Code: base.Code_SERVICE_ERR,
-				Msg:  "token 解析失败. Internal Error",
+				Msg:  "token.userId 解析失败. Internal Error",
 			},
 		})
 		return

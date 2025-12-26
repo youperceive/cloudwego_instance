@@ -3,6 +3,9 @@
 package main
 
 import (
+	"context"
+
+	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/youperceive/cloudwego_instance/api/biz/middleware"
 )
@@ -10,6 +13,20 @@ import (
 func main() {
 	h := server.Default()
 
+	h.Use(func(c context.Context, ctx *app.RequestContext) {
+		// 允许所有源（生产环境可指定具体域名，如http://localhost:8080）
+		ctx.Response.Header.Set("Access-Control-Allow-Origin", "*")
+		// 允许的请求方法
+		ctx.Response.Header.Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+		// 允许的请求头
+		ctx.Response.Header.Set("Access-Control-Allow-Headers", "Content-Type, user_token")
+		// 处理OPTIONS预检请求
+		if string(ctx.Request.Method()) == "OPTIONS" {
+			ctx.AbortWithStatus(200)
+			return
+		}
+		ctx.Next(c)
+	})
 	h.Use(middleware.JWTMiddleware())
 
 	register(h)

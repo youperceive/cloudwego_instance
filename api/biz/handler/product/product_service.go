@@ -4,12 +4,14 @@ package product
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 
 	"github.com/youperceive/cloudwego_instance/api/biz/model/base"
+	"github.com/youperceive/cloudwego_instance/api/biz/model/product"
 	productModel "github.com/youperceive/cloudwego_instance/api/biz/model/product"
 	pkgProduct "github.com/youperceive/cloudwego_instance/api/pkg/product"
 )
@@ -355,5 +357,161 @@ func DeductSkuStock(ctx context.Context, c *app.RequestContext) {
 		resp.RemainStock = &remainStock // 返回剩余库存
 	}
 
+	c.JSON(consts.StatusOK, resp)
+}
+
+// ListProduct 按商户ID查询商品列表（分页）
+// @router /list_product [POST]
+func ListProduct(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req productModel.ListProductRequest
+	// 绑定并校验请求参数
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		c.String(consts.StatusBadRequest, err.Error())
+		return
+	}
+
+	// 初始化响应结构体
+	resp := new(productModel.ListProductResponse)
+	// 默认成功响应
+	resp.BaseResp = &base.BaseResponse{
+		Code: codeSuccess,
+		Msg:  msgSuccess,
+	}
+
+	// 分页参数容错处理（防止前端传非法值）
+	pageNum := int(req.PageNum)
+	if pageNum <= 0 {
+		pageNum = 1 // 默认第一页
+	}
+	pageSize := int(req.PageSize)
+	if pageSize <= 0 || pageSize > 100 { // 限制最大页大小，避免查全表
+		pageSize = 20 // 默认每页20条
+	}
+
+	// 调用 crud 层查询商品列表
+	products, total, err := pkgProduct.ListProductByMerchant(
+		ctx,
+		req.MerchantID, // Thrift生成的驼峰字段（merchant_id → MerchantId）
+		pageNum,
+		pageSize,
+	)
+	if err != nil {
+		log.Printf("[ListProduct] 查询商品列表失败: %v", err)
+		resp.BaseResp.Code = codeFailed
+		resp.BaseResp.Msg = fmt.Sprintf("查询商品列表失败: %s", err.Error())
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
+
+	// 设置总数
+	resp.Total = &total
+	// 转换 crud 层 Product 到 model 层 Product
+	resp.Products = make([]*productModel.Product, 0, len(products))
+	for _, p := range products {
+		resp.Products = append(resp.Products, &productModel.Product{
+			ID:         p.ID,
+			MerchantID: p.MerchantID,
+			Name:       p.Name,
+			Ext:        p.Ext,
+		})
+	}
+
+	// 返回响应
+	c.JSON(consts.StatusOK, resp)
+}
+
+// ListSku 按商品ID查询SKU列表（校验商户归属）
+// @router /list_sku [POST]
+func ListSku(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req productModel.ListSkuRequest
+	// 绑定并校验请求参数
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		c.String(consts.StatusBadRequest, err.Error())
+		return
+	}
+
+	// 初始化响应结构体
+	resp := new(productModel.ListSkuResponse)
+	// 默认成功响应
+	resp.BaseResp = &base.BaseResponse{
+		Code: codeSuccess,
+		Msg:  msgSuccess,
+	}
+
+	// 调用 crud 层查询SKU列表（自动校验商户归属）
+	skus, err := pkgProduct.ListSkuByProduct(
+		ctx,
+		req.MerchantID, // 校验归属的商户ID
+		req.ProductID,  // 要查询的商品ID
+	)
+	if err != nil {
+		log.Printf("[ListSku] 查询SKU列表失败: %v", err)
+		resp.BaseResp.Code = codeFailed
+		resp.BaseResp.Msg = fmt.Sprintf("查询SKU列表失败: %s", err.Error())
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
+
+	// 转换 crud 层 Sku 到 model 层 Sku
+	resp.Skus = make([]*productModel.Sku, 0, len(skus))
+	for _, s := range skus {
+		resp.Skus = append(resp.Skus, &productModel.Sku{
+			ID:        s.ID,
+			ProductID: s.ProductID,
+			SkuCode:   s.SkuCode,
+			Price:     s.Price,
+			Stock:     s.Stock,
+		})
+	}
+
+	// 返回响应
+	c.JSON(consts.StatusOK, resp)
+}
+
+// ListMerchant .
+// @router /list_merchant [GET]
+func ListMerchant(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req product.ListMerchantRequest // 入参结构体（GET请求无参数，仅保留绑定流程）
+
+	// 1. 绑定并校验请求参数（和ListSku完全对齐，即使无参数也保留流程）
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		c.String(consts.StatusBadRequest, err.Error())
+		return
+	}
+
+	// 2. 初始化响应结构体（设置默认成功响应，和ListSku一致）
+	resp := new(product.ListMerchantResponse)
+	resp.BaseResp = &base.BaseResponse{
+		Code: base.Code_SUCCESS, // 替换为你的成功码常量（如0）
+		Msg:  "Success",         // 替换为你的成功提示语（如"success"）
+	}
+
+	// 3. 调用CRUD层查询所有商户（核心逻辑）
+	merchants, err := pkgProduct.ListMerchant(ctx) // 调用你之前实现的ListMerchant CRUD函数
+	if err != nil {
+		// 4. 错误处理：打印日志+设置响应错误信息（和ListSku风格一致）
+		log.Printf("[ListMerchant] 查询商户列表失败: %v", err)
+		resp.BaseResp.Code = base.Code_SERVICE_ERR
+		resp.BaseResp.Msg = fmt.Sprintf("查询商户列表失败: %s", err.Error())
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
+
+	// 5. 转换CRUD层Merchant到model层Merchant（和ListSku的SKU转换逻辑对齐）
+	resp.Data = make([]*product.Merchant, 0, len(merchants))
+	for _, m := range merchants {
+		resp.Data = append(resp.Data, &product.Merchant{
+			ID:   m.ID,   // 商户ID（核心字段）
+			Name: m.Name, // 商户名称（可选，按需保留）
+		})
+	}
+
+	// 6. 返回响应（和ListSku一致，
 	c.JSON(consts.StatusOK, resp)
 }

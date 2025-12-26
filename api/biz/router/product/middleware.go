@@ -55,3 +55,18 @@ func _updateskuMw() []app.HandlerFunc {
 	// your code...
 	return nil
 }
+
+func _listproductMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _listskuMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _listmerchantMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}

@@ -12,18 +12,20 @@ import (
 const UserIDKey = "user_id"
 
 var jwtWhitelist = map[string]bool{
-	"/order/create": true,
+	"/create": true,
 }
 
 func JWTMiddleware() app.HandlerFunc {
 	return func(c context.Context, ctx *app.RequestContext) {
+		hlog.Info(ctx.FullPath())
+
 		path := ctx.FullPath()
 		if !jwtWhitelist[path] {
 			ctx.Next(c)
 			return
 		}
 
-		tokenStr := ctx.GetHeader("Authorization")
+		tokenStr := ctx.GetHeader("user_token")
 		if len(tokenStr) == 0 {
 			ctx.JSON(consts.StatusUnauthorized, map[string]interface{}{
 				"baseResp": map[string]interface{}{
@@ -34,8 +36,9 @@ func JWTMiddleware() app.HandlerFunc {
 			ctx.Abort()
 			return
 		}
+		hlog.Info(string(tokenStr))
 
-		userID, err := token.VerifyToken(string(tokenStr))
+		claims, err := token.VerifyToken(string(tokenStr))
 		if err != nil {
 			hlog.Error("Token解析失败:", err)
 			ctx.JSON(consts.StatusUnauthorized, map[string]interface{}{
@@ -48,8 +51,8 @@ func JWTMiddleware() app.HandlerFunc {
 			return
 		}
 
-		ctx.Set(UserIDKey, userID)
-		hlog.Debug("JWT校验通过，用户ID:", userID)
+		ctx.Set(UserIDKey, claims.UserID)
+		hlog.Debug("JWT校验通过，用户ID:", claims.UserID)
 
 		ctx.Next(c)
 	}

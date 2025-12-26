@@ -46,9 +46,9 @@ func GenerateCaptcha(ctx context.Context, c *app.RequestContext) {
 		Type:   base_k.TargetType(req.Type),
 		Target: req.Target,
 		// Purpose:          req.Purpose, 文档标明已丢弃
-		ExpireSeconds:    req.ExpireSeconds,
-		MaxValidateTimes: req.MaxValidateTimes,
-		Proj:             req.Proj,
+		ExpireSeconds:    300,
+		MaxValidateTimes: 3,
+		Proj:             "order",
 		BizType:          req.BizType,
 	}
 	respK, err := verifyCodeClient.GenerateCaptcha(ctx, reqK)

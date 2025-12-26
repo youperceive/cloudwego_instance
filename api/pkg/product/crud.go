@@ -291,3 +291,169 @@ func unmarshalExt(data []byte) map[string]string {
 	_ = json.Unmarshal(data, &ext)
 	return ext
 }
+
+// ListProductByMerchant 按商户ID查询商品列表（分页）
+func ListProductByMerchant(ctx context.Context, merchantID int64, pageNum, pageSize int) ([]*Product, int64, error) {
+	// 前置检查：DB是否初始化
+	if DB == nil {
+		return nil, 0, errors.New("ListProductByMerchant: 数据库连接未初始化（DB为nil）")
+	}
+
+	// 1. 查询总数（用于分页）
+	var total int64
+	err := DB.QueryRowContext(ctx, `
+		SELECT COUNT(*) FROM product WHERE merchant_id=?
+	`, merchantID).Scan(&total)
+	if err != nil {
+		return nil, 0, fmt.Errorf("ListProductByMerchant: 查询总数失败: %w", err)
+	}
+
+	// 2. 计算分页偏移量（pageNum从1开始）
+	offset := (pageNum - 1) * pageSize
+	if offset < 0 {
+		offset = 0
+	}
+
+	// 3. 查询商品列表
+	rows, err := DB.QueryContext(ctx, `
+		SELECT id, merchant_id, name, ext FROM product 
+		WHERE merchant_id=? 
+		ORDER BY id DESC 
+		LIMIT ? OFFSET ?
+	`, merchantID, pageSize, offset)
+	if err != nil {
+		return nil, 0, fmt.Errorf("ListProductByMerchant: 查询列表失败: %w", err)
+	}
+	defer rows.Close()
+
+	// 4. 解析结果
+	products := make([]*Product, 0, pageSize)
+	for rows.Next() {
+		var (
+			p   Product
+			ext []byte
+		)
+		err := rows.Scan(&p.ID, &p.MerchantID, &p.Name, &ext)
+		if err != nil {
+			return nil, 0, fmt.Errorf("ListProductByMerchant: 解析商品失败: %w", err)
+		}
+		p.Ext = unmarshalExt(ext)
+		products = append(products, &p)
+	}
+
+	// 5. 检查rows遍历是否出错
+	if err = rows.Err(); err != nil {
+		return nil, 0, fmt.Errorf("ListProductByMerchant: 遍历商品失败: %w", err)
+	}
+
+	return products, total, nil
+}
+
+// ListSkuByProduct 按商品ID查询SKU列表（校验商户归属）
+func ListSkuByProduct(ctx context.Context, merchantID, productID int64) ([]*Sku, error) {
+	// 前置检查：DB是否初始化
+	if DB == nil {
+		return nil, errors.New("ListSkuByProduct: 数据库连接未初始化（DB为nil）")
+	}
+
+	// 1. 校验商品归属（确保商户只能查自己的商品SKU）
+	var count int64
+	err := DB.QueryRowContext(ctx, `
+		SELECT COUNT(*) FROM product WHERE id=? AND merchant_id=?
+	`, productID, merchantID).Scan(&count)
+	if err != nil {
+		return nil, fmt.Errorf("ListSkuByProduct: 校验商品归属失败: %w", err)
+	}
+	if count == 0 {
+		return nil, errors.New("ListSkuByProduct: 商品不存在或无权查询")
+	}
+
+	// 2. 查询该商品下的所有SKU
+	rows, err := DB.QueryContext(ctx, `
+		SELECT id, merchant_id, product_id, sku_code, price, stock FROM sku 
+		WHERE product_id=? 
+		ORDER BY id ASC
+	`, productID)
+	if err != nil {
+		return nil, fmt.Errorf("ListSkuByProduct: 查询SKU列表失败: %w", err)
+	}
+	defer rows.Close()
+
+	// 3. 解析结果
+	skus := make([]*Sku, 0)
+	for rows.Next() {
+		var s Sku
+		err := rows.Scan(&s.ID, &s.MerchantID, &s.ProductID, &s.SkuCode, &s.Price, &s.Stock)
+		if err != nil {
+			return nil, fmt.Errorf("ListSkuByProduct: 解析SKU失败: %w", err)
+		}
+		skus = append(skus, &s)
+	}
+
+	// 4. 检查rows遍历是否出错
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("ListSkuByProduct: 遍历SKU失败: %w", err)
+	}
+
+	return skus, nil
+}
+
+// Merchant 商户结构体（精准匹配user表：ID对应id，Name对应username）
+type Merchant struct {
+	ID   int64  `db:"id"`   // 商户ID（user表的id，int类型转int64）
+	Name string `db:"name"` // 商户名称（对应user表的username字段）
+}
+
+// ListMerchant 查询所有商户列表（适配真实user表结构）
+// 逻辑：从user表筛选user_type=2的记录，提取id和username作为商户信息
+func ListMerchant(ctx context.Context) ([]*Merchant, error) {
+	// 前置检查：数据库连接是否初始化
+	if DB == nil {
+		return nil, errors.New("ListMerchant: 数据库连接未初始化（DB为nil）")
+	}
+
+	// 核心修正1：SQL查询字段改为 id + username（匹配user表的真实列名）
+	// 筛选条件：user_type=2（商户）、status=1（正常状态，可选，根据业务补充）
+	rows, err := DB.QueryContext(ctx, `
+		SELECT id, username FROM user_account_db.user 
+		WHERE user_type=2 AND status=1  -- 仅查正常状态的商户
+		ORDER BY id ASC
+	`)
+	if err != nil {
+		return nil, fmt.Errorf("ListMerchant: 查询商户列表失败: %w", err)
+	}
+	defer rows.Close() // 释放结果集，避免连接泄漏
+
+	// 解析查询结果
+	merchants := make([]*Merchant, 0)
+	for rows.Next() {
+		// 核心修正2：临时变量适配user表的字段类型（id是int，username是string）
+		var (
+			id       int    // 匹配user表的id（int类型）
+			username string // 匹配user表的username（商户名称）
+		)
+		// Scan顺序严格匹配SQL的 id → username
+		err := rows.Scan(&id, &username)
+		if err != nil {
+			return nil, fmt.Errorf("ListMerchant: 解析商户数据失败（id=%d）: %w", id, err)
+		}
+
+		// 转换为Merchant结构体（id转int64，username赋值给Name）
+		merchants = append(merchants, &Merchant{
+			ID:   int64(id), // int → int64，兼容结构体定义
+			Name: username,  // user表的username = 商户名称
+		})
+	}
+
+	// 检查遍历过程中的错误
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("ListMerchant: 遍历商户列表失败: %w", err)
+	}
+
+	// 兜底：无商户数据时返回空切片（前端无需判nil）
+	if len(merchants) == 0 {
+		return []*Merchant{}, nil
+	}
+
+	return merchants, nil
+}

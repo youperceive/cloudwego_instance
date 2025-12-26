@@ -24,6 +24,9 @@ func Register(r *server.Hertz) {
 	root.POST("/delete_sku", append(_deleteskuMw(), product.DeleteSku)...)
 	root.POST("/get_product", append(_getproductMw(), product.GetProduct)...)
 	root.POST("/get_sku", append(_getskuMw(), product.GetSku)...)
+	root.GET("/list_merchant", append(_listmerchantMw(), product.ListMerchant)...)
+	root.POST("/list_product", append(_listproductMw(), product.ListProduct)...)
+	root.POST("/list_sku", append(_listskuMw(), product.ListSku)...)
 	root.POST("/update_product", append(_updateproductMw(), product.UpdateProduct)...)
 	root.POST("/update_sku", append(_updateskuMw(), product.UpdateSku)...)
 }
