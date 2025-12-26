@@ -1,0 +1,23 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      '@modern-js/create':
+        specifier: ^2.69.6
+        version: 2.69.6
+
+packages:
+
+  '@modern-js/create@2.69.6':
+    resolution: {integrity: sha512-+kp28234TI+cQY7HeZwiw4Ab8Ag4xowbRsdGgZmsW7Dh/zjnG6zdGLRRfiY8arQQp0zyivYPITJ8gSQKdwMUiw==}
+    hasBin: true
+
+snapshots:
+
+  '@modern-js/create@2.69.6': {}

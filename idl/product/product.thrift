@@ -118,6 +118,49 @@ struct DeductSkuStockResponse {
     2: optional i32 remain_stock,           // 剩余库存
 }
 
+// ====================== 新增：列表接口请求/响应 ======================
+// 商户商品列表请求（分页）
+struct ListProductRequest {
+    1: required i64 merchant_id,    // 商户ID（必传，校验归属）
+    2: optional i32 page_num = 1,   // 页码（默认1）
+    3: optional i32 page_size = 20, // 页大小（默认20，建议限制最大100）
+}
+
+// 商户商品列表响应
+struct ListProductResponse {
+    1: required base.BaseResponse BaseResp,
+    2: optional i64 total,                  // 商品总数（用于分页）
+    3: optional list<Product> products,     // 商品列表
+}
+
+// 商品SKU列表请求
+struct ListSkuRequest {
+    1: required i64 merchant_id, // 商户ID（必传，校验归属）
+    2: required i64 product_id,  // 商品ID（必传）
+}
+
+// 商品SKU列表响应
+struct ListSkuResponse {
+    1: required base.BaseResponse BaseResp,
+    2: optional list<Sku> skus,             // SKU列表
+}
+
+// 商户基础结构体（仅保留ID字段，满足需求）
+struct Merchant {
+    1: i64 id,
+    2: string name,
+}
+
+// 获取所有商户请求（无入参）
+struct ListMerchantRequest {
+}
+
+// 获取所有商户响应
+struct ListMerchantResponse {
+    1: base.BaseResponse baseResp,
+    2: list<Merchant> data,
+}
+
 // ====================== 商品服务核心接口 ======================
 service ProductService {
     // 商户端商品CRUD
@@ -132,4 +175,8 @@ service ProductService {
     // 订单联动接口
     GetSkuResponse GetSku(1: GetSkuRequest req) (api.post = "/get_sku"),
     DeductSkuStockResponse DeductSkuStock(1: DeductSkuStockRequest req) (api.post = "/deduct_sku"),
+    // ====================== 新增：列表接口 ======================
+    ListProductResponse ListProduct(1: ListProductRequest req) (api.post = "/list_product"),         // 商户商品列表
+    ListSkuResponse ListSku(1: ListSkuRequest req) (api.post = "/list_sku"),                         // 商品SKU列表
+    ListMerchantResponse ListMerchant(1: ListMerchantRequest req) (api.get = "/list_merchant"),
 }

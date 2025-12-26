@@ -1,0 +1,5 @@
+{
+	"dependencies": {
+		"@modern-js/create": "^2.69.6"
+	}
+}

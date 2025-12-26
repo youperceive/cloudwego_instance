@@ -44,9 +44,9 @@ func validateRegisterReq(req *user_account.RegisterRequest) error {
 func (s *UserAccountServiceImpl) Register(ctx context.Context, req *user_account.RegisterRequest) (resp *user_account.RegisterResponse, err error) {
 	klogErr := func(msg string) {
 		klog.Error(
-			"method", "Register",
-			"message", msg,
-			"target", req.Target,
+			"method: ", "Register.",
+			"message: ", msg,
+			"target: ", req.String(),
 		)
 	}
 
@@ -63,8 +63,8 @@ func (s *UserAccountServiceImpl) Register(ctx context.Context, req *user_account
 	}
 
 	captchaReq := &verify_code.ValidateCaptchaRequest{
-		Proj:    "user-account-service",
-		BizType: "login",
+		Proj:    "order",
+		BizType: "user_register",
 		Target:  req.Target,
 		Captcha: req.Captcha,
 	}
@@ -121,6 +121,7 @@ func (s *UserAccountServiceImpl) Register(ctx context.Context, req *user_account
 	} else {
 		daoUser.Email = &req.Target
 	}
+	daoUser.UserType = req.UserType
 	daoUser.RegisterType = int8(req.TargetType)
 
 	userID, err := dao.CreateUser(daoUser)

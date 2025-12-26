@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/youperceive/cloudwego_instance/rpc/verify_code/kitex_gen/base"
 	verify_code "github.com/youperceive/cloudwego_instance/rpc/verify_code/kitex_gen/verify_code"
 	"github.com/youperceive/cloudwego_instance/rpc/verify_code/pkg/redis"
@@ -78,11 +79,19 @@ func (s *VerifyCodeServiceImpl) GenerateCaptcha(ctx context.Context, req *verify
 // ValidateCaptcha implements the CaptchaServiceImpl interface.
 func (s *VerifyCodeServiceImpl) ValidateCaptcha(ctx context.Context, req *verify_code.ValidateCaptchaRequest) (resp *verify_code.ValidateCaptchaResponse, err error) {
 
+	klogErr := func(msg string) {
+		klog.Error(
+			"Method: ", "ValidateCaptcha. ",
+			"req: ", req.String(),
+			"msg: ", msg,
+		)
+	}
+
 	key := redis.MakeKey([]string{req.Proj, req.BizType, req.Target})
 
 	code, remain, err := redis.GetAndDecrementCount(ctx, key)
 	if err != nil {
-		log.Println(err)
+		klogErr(err.Error())
 		if err == redis_v9.Nil {
 			log.Println("not exists the code")
 			resp = &verify_code.ValidateCaptchaResponse{
@@ -122,6 +131,7 @@ func (s *VerifyCodeServiceImpl) ValidateCaptcha(ctx context.Context, req *verify
 
 	err = redis.Delete(ctx, key)
 	if err != nil {
+		klogErr(err.Error())
 		log.Println(err)
 		resp = &verify_code.ValidateCaptchaResponse{
 			BaseResp: &base.BaseResponse{

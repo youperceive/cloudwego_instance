@@ -1,25 +1,26 @@
 # 移除过时的version字段（避免警告）
 services:
-  etcd:
-    image: etcd:latest
-    ports:
-      - "2379:2379" # 客户端端口
-      - "2380:2380" # 集群通信端口
-    volumes:
-      - etcd-data:/var/lib/etcd # 数据持久化卷
-    restart: always
-    # 关键修复：第一个参数是etcd可执行文件路径，后续是启动参数
-    command:
-      - /usr/local/bin/etcd
-      - --data-dir=/var/lib/etcd
-      - --listen-client-urls=http://0.0.0.0:2379
-      - --advertise-client-urls=http://0.0.0.0:2379
-      - --listen-peer-urls=http://0.0.0.0:2380
-      - --initial-advertise-peer-urls=http://0.0.0.0:2380
-      - --initial-cluster=default=http://0.0.0.0:2380
-      - --initial-cluster-token=etcd-cluster-token
-      - --initial-cluster-state=new
-      - --name=default
+  # etcd:
+  #   image: etcd:latest
+  #   ports:
+  #     - "2379:2379" # 客户端端口
+  #     - "2380:2380" # 集群通信端口
+  #   volumes:
+  #     - etcd-data:/var/lib/etcd # 数据持久化卷
+  #   restart: always
+  #   # 关键修复：第一个参数是etcd可执行文件路径，后续是启动参数
+  #   command:
+  #     - /usr/local/bin/etcd
+  #     - --data-dir=/var/lib/etcd
+  #     - --listen-client-urls=http://0.0.0.0:2379
+  #     - --advertise-client-urls=http://0.0.0.0:2379
+  #     - --listen-peer-urls=http://0.0.0.0:2380
+  #     - --initial-advertise-peer-urls=http://0.0.0.0:2380
+  #     - --initial-cluster=default=http://0.0.0.0:2380
+  #     - --initial-cluster-token=etcd-cluster-token
+  #     - --initial-cluster-state=new
+  #     - --name=default
+  #  docker exec -it verify_code-redis-1 redis-cli
 
   redis:
     image: docker.xuanyuan.run/ubuntu/redis:5.0-20.04_edge
@@ -37,14 +38,14 @@ services:
     environment:
       - PRINT_CAPTCHA=true
       - REDIS_ADDR=redis:6379
-      - ETCD_ADDR=etcd:2379 # 访问docker-compose内的etcd服务
+      # - ETCD_ADDR=etcd:2379 # 访问docker-compose内的etcd服务
     depends_on:
       - redis
-      - etcd
+      # - etcd
     restart: always
     ports:
       - "8000:8000"
 
 volumes:
   redis-data:
-  etcd-data:
+  # etcd-data:
